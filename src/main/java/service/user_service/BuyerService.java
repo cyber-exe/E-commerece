@@ -38,6 +38,7 @@ public class BuyerService implements BaseService<Buyer, String> {
 
     @Override
     public Buyer edit(Buyer buyer) {
+        if(buyer != null) return buyer;
         return null;
     }
 
