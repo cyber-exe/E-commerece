@@ -2,7 +2,7 @@ package service.user_service;
 
 import model.user.Buyer;
 import service.BaseService;
-import service.paths.Path;
+import service.paths.Root;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ public class BuyerService implements BaseService<Buyer, String> {
     List<Buyer> buyers = new ArrayList<>();
     {
         try {
-            buyers = listFromJson(buyers, Path.buyersPath);
+            buyers = listFromJson(buyers, Root.buyersPath);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -24,7 +24,7 @@ public class BuyerService implements BaseService<Buyer, String> {
     public Buyer add(Buyer buyer) throws IOException {
         if(!this.check(buyer)) {
             buyers.add(buyer);
-            this.toJson(buyers, Path.buyersPath);
+            this.toJson(buyers, Root.buyersPath);
             return buyer;
         }
 
