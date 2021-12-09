@@ -11,6 +11,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class Main {
 
@@ -46,10 +47,11 @@ public class Main {
             System.out.println(buyer.toString());
         }
         Buyer buyer = new Buyer();
-        buyer.setName("Jasur");
-        buyer.setEmail("Jasur");
-        buyer.setPhone("123");
-        buyerService.add(buyer);
+        buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
+        buyer.setName("polvon");
+        buyer.setEmail("xon");
+        buyer.setPhone("777");
+        buyerService.edit(buyer);
 
 
     }
