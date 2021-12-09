@@ -16,6 +16,4 @@ public class Buyer extends BaseModel {
     private String phone;
     private String email;
     private String password;
-
-
 }
