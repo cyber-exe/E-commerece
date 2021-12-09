@@ -3,13 +3,20 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import model.user.Buyer;
+import model.user.Card;
 import model.user.Gender;
 import service.user_service.BuyerService;
+import service.user_service.CardService;
 
+import javax.xml.crypto.Data;
 import java.io.*;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -46,13 +53,22 @@ public class Main {
         for (Buyer buyer : list) {
             System.out.println(buyer.toString());
         }
-        Buyer buyer = new Buyer();
-        buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
-        buyer.setName("polvon");
-        buyer.setEmail("xon");
-        buyer.setPhone("777");
-        buyerService.edit(buyer);
+//        Buyer buyer = new Buyer();
+//        buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
+//        buyer.setName("polvon");
+//        buyer.setEmail("xon");
+//        buyer.setPhone("777");
+//        buyerService.edit(buyer);
+        CardService cardService = new CardService();
+//        List<Card> list1 = cardService.getList();
+//        for (Card card : list1) {
+//            System.out.println(card.toString());
+//        }
 
-
+        Card card = new Card();
+        card.setCardNum("123456789");
+//        card.setExpireDate(LocalDate.of(2020, 1, 8));
+        card.setOwnerId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
+        cardService.add(card);
     }
 }
