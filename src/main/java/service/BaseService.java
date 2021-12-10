@@ -13,9 +13,10 @@ import java.util.UUID;
 
 public interface BaseService<I,T> {
     I add(I i) throws IOException;
-    boolean delete(I i);
-    I edit(I i);
+    boolean delete(I i) throws IOException;
+    I edit(I i) throws IOException;
     I get(UUID id);
+    List<I> getList();
     boolean check(I i);
 
 
