@@ -19,4 +19,11 @@
   "phone" : "123",
   "email" : "Jasur",
   "active" : true
+}, {
+  "id" : "d7ab8863-8a56-4c9d-82d3-2011b9f9d9ff",
+  "name" : "ALISHER",
+  "age" : 0,
+  "phone" : "000",
+  "email" : "BEK",
+  "active" : true
 } ]

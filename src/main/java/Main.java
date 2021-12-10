@@ -53,12 +53,14 @@ public class Main {
         for (Buyer buyer : list) {
             System.out.println(buyer.toString());
         }
-//        Buyer buyer = new Buyer();
-//        buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
-//        buyer.setName("polvon");
-//        buyer.setEmail("xon");
-//        buyer.setPhone("777");
-//        buyerService.edit(buyer);
+        Buyer buyer = new Buyer();
+        //buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
+        buyer.setName("ALISHER");
+        buyer.setEmail("BEK");
+        buyer.setPhone("000");
+        buyerService.add(buyer);
+
+        /*
         CardService cardService = new CardService();
 //        List<Card> list1 = cardService.getList();
 //        for (Card card : list1) {
@@ -69,7 +71,7 @@ public class Main {
         card.setCardNum("123456789");
 //        card.setExpireDate(LocalDate.of(2020, 1, 8));
         card.setOwnerId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
-        cardService.add(card);
+        cardService.add(card);*/
 
     }
 }
