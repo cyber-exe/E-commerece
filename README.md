@@ -4,18 +4,25 @@
 
 This is a simple project in Java using the Maven building tool. It simply implements some necessary features of the Alibaba.com market.
 
-## Getting Started
-
-
+## Getting Started:smile: 🇺🇿
 
 ```bash
-Just install all the frameworks and libraries that is needed to build the project
+Just install all the frameworks and libraries that is needed to build the project 
 ```
+
+### Language and Frameworks(Technologies, Libraries e.t.c)  used :fire:
++ Java (OOP, Advanced)
++ Maven (building tool)
+
+  Libraries
+  + Apache(Poi)
+  + Jackson
+  + lombok
 
 ## Main features
 
 ```python
-
+ 
 
 ```
 
