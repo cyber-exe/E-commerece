@@ -70,5 +70,6 @@ public class Main {
 //        card.setExpireDate(LocalDate.of(2020, 1, 8));
         card.setOwnerId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
         cardService.add(card);
+
     }
 }
