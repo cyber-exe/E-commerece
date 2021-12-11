@@ -1,11 +1,9 @@
 package bot;
 
-import lombok.SneakyThrows;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.CallbackQuery;
 import org.telegram.telegrambots.meta.api.objects.Update;
-import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResult;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
@@ -19,7 +17,15 @@ import java.util.List;
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String chatId;
     private String message;
-    private String lang;
+    private int idx = 0;
+    List<ManageLang> manageLangList = new ArrayList<>();
+
+    public TgBot(){
+        manageLangList.add(new ContentUz());//0
+        manageLangList.add(new ContentRu());//1
+        manageLangList.add(new ContentEng());//2
+    }
+
 
     @Override
     public String getBotUsername() {
@@ -33,7 +39,6 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
     @Override
     public void onUpdateReceived(Update update) {
-
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
 
@@ -44,9 +49,14 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 this.execute(langMenu(), this.message);
             } else if(text.equals("Uzbek")) {
-                this.execute(mainMenu(), "Tizimga kirish");
-            } else if(text.equals("English")) {
-
+                idx = 0;
+                this.execute(mainMenu() , manageLangList.get(idx).start_header);
+            } else if(text.equals("Russian")) {
+                idx = 1;
+                this.execute(mainMenu() , manageLangList.get(idx).start_header);
+            } else {
+                idx = 2;
+                this.execute(mainMenu() , manageLangList.get(idx).start_header);
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
@@ -63,16 +73,16 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         inlineKeyboardMarkup.setKeyboard(list);
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("Kirish");
-        inlineKeyboardButton.setCallbackData("SINGIN");
-        inlineKeyboardButton.setCallbackData(LangUzb.KIRISH.toString());
+        inlineKeyboardButton.setText(manageLangList.get(idx).sign_in);
+
+        inlineKeyboardButton.setCallbackData("adsfadf");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
         inlineKeyboardButton1.setText("Registratsiya");
         inlineKeyboardButton1.setCallbackData("SIGNUP");
-        inlineKeyboardButton1.setCallbackData("Sign Up");
+
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
@@ -91,7 +101,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         keyboardRow.add("Uzbek");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("Русский");
+        keyboardRow1.add("Russian");
 
         KeyboardRow keyboardRow2 = new KeyboardRow();
         keyboardRow2.add("English");
