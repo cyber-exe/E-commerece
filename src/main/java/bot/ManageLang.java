@@ -2,10 +2,8 @@ package bot;
 
 abstract class ManageLang {
     public String start_header;
+    public String sign_up;
     public String sign_in;
-
-
-
 
 
 

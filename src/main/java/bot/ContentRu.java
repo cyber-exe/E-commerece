@@ -4,11 +4,9 @@ import lombok.Data;
 
 @Data
 class ContentRu extends ManageLang{
-
-
     ContentRu(){
-        start_header = "Privyet vi vibrali ruskiy yazika! ";
-        sign_in = "proydite registratsiyu pajalyusta";
+        start_header = "Выбран русский язык! ";
+        sign_in = "Войти";
+        sign_up = "Зарегистрироваться";
     }
-
 }

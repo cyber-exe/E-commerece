@@ -7,6 +7,7 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
@@ -49,15 +50,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
 
                 this.execute(langMenu(), this.message);
-            } else if(text.equals("Uzbek")) {
+            } else if(text.equals("Uzbek") || text.equals("Russian") || text.equals("English")) {
                 this.lang = text;
-                this.execute(mainMenu() , manageLangList.getOrDefault("Uzbek", new ContentEng()).start_header);
-            } else if(text.equals("Russian")) {
-                this.lang = text;
-                this.execute(mainMenu() , manageLangList.getOrDefault("Russian", new ContentEng()).start_header);
-            } else if(text.equals("English")){
-                this.lang = text;
-                this.execute(mainMenu() , manageLangList.getOrDefault("English", new ContentEng()).start_header);
+                this.execute(mainMenu() , manageLangList.getOrDefault(text, new ContentEng()).start_header);
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
@@ -67,6 +62,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
+    public void signIn() {
+
+    }
+
     public InlineKeyboardMarkup mainMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> list = new ArrayList<>();
@@ -74,15 +73,16 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         inlineKeyboardMarkup.setKeyboard(list);
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_in);
 
-        inlineKeyboardButton.setCallbackData("adsfadf");
+        inlineKeyboardButton.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_in);
+        inlineKeyboardButton.setCallbackData("SIGNIN");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText("Registratsiya");
+        inlineKeyboardButton1.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_up);
         inlineKeyboardButton1.setCallbackData("SIGNUP");
+
 
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
@@ -97,8 +97,14 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         replyKeyboardMarkup.setKeyboard(keyboardRows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        replyKeyboardMarkup.setInputFieldPlaceholder("Language...");
 
         KeyboardRow keyboardRow = new KeyboardRow();
+        KeyboardButton button1 = new KeyboardButton();
+        button1.setText("Uzbek");
         keyboardRow.add("Uzbek");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
