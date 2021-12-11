@@ -1,3 +1,4 @@
+import bot.TgBot;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -8,6 +9,9 @@ import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import model.user.Buyer;
 import model.user.Card;
 import model.user.Gender;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 import service.user_service.BuyerService;
 import service.user_service.CardService;
 
@@ -22,7 +26,7 @@ import java.util.UUID;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, TelegramApiException {
 //        System.out.println("Hello ");
 //        Buyer buyer = new Buyer();
 //        buyer.setName("dsa");
@@ -46,19 +50,19 @@ public class Main {
 //        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 //        List<Buyer> buyer = objectMapper.readValue(str, new TypeReference<List<Buyer>>() {});
 //        System.out.println("node" + buyer.get(0));
-
-        BuyerService buyerService = new BuyerService();
-
-        List<Buyer> list = buyerService.getList();
-        for (Buyer buyer : list) {
-            System.out.println(buyer.toString());
-        }
-        Buyer buyer = new Buyer();
-        //buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
-        buyer.setName("ALISHER");
-        buyer.setEmail("BEK");
-        buyer.setPhone("000");
-        buyerService.add(buyer);
+//
+//        BuyerService buyerService = new BuyerService();
+//
+//        List<Buyer> list = buyerService.getList();
+//        for (Buyer buyer : list) {
+//            System.out.println(buyer.toString());
+//        }
+//        Buyer buyer = new Buyer();
+//        //buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
+//        buyer.setName("ALISHER");
+//        buyer.setEmail("BEK");
+//        buyer.setPhone("000");
+//        buyerService.add(buyer);
 
         /*
         CardService cardService = new CardService();
@@ -73,5 +77,8 @@ public class Main {
         card.setOwnerId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
         cardService.add(card);*/
 
+
+        TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
+        telegramBotsApi.registerBot(new TgBot());
     }
 }
