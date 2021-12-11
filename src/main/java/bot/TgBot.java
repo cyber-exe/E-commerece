@@ -33,6 +33,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
     @Override
     public void onUpdateReceived(Update update) {
+
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
 
@@ -64,12 +65,14 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
         inlineKeyboardButton.setText("Kirish");
         inlineKeyboardButton.setCallbackData("SINGIN");
+        inlineKeyboardButton.setCallbackData(LangUzb.KIRISH.toString());
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
         inlineKeyboardButton1.setText("Registratsiya");
         inlineKeyboardButton1.setCallbackData("SIGNUP");
+        inlineKeyboardButton1.setCallbackData("Sign Up");
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
