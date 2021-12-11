@@ -41,8 +41,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 this.execute(langMenu(), this.message);
             } else if(text.equals("Uzbek")) {
-                this.execute(mainMenu(), "Tizimga kirish");
+
+                this.execute(mainMenu(new ContentUz()) , ContentUz.start_header);
             } else if(text.equals("English")) {
+
 
             }
         } else if(update.hasCallbackQuery()) {
@@ -53,23 +55,27 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    public InlineKeyboardMarkup mainMenu() {
+    public InlineKeyboardMarkup mainMenu(ManageLang language) {
+        ContentTemp temp = new ContentTemp();
+        if(language instanceof ContentUz)
+                temp = new ContentUz();
+
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> list = new ArrayList<>();
 
         inlineKeyboardMarkup.setKeyboard(list);
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("Kirish");
-        inlineKeyboardButton.setCallbackData("SINGIN");
-        inlineKeyboardButton.setCallbackData(LangUzb.KIRISH.toString());
+        inlineKeyboardButton.setText(language.getContent().st);
+
+        inlineKeyboardButton.setCallbackData(L);
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
         inlineKeyboardButton1.setText("Registratsiya");
         inlineKeyboardButton1.setCallbackData("SIGNUP");
-        inlineKeyboardButton1.setCallbackData("Sign Up");
+
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
