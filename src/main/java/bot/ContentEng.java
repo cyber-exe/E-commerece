@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 class ContentEng extends ManageLang{
 
-    public final String start_header = "welcome";
-
+    ContentEng(){
+        start_header = "Hello user you have chosen English language!";
+        sign_in = "Start register";
+    }
 }

@@ -5,10 +5,10 @@ import lombok.Data;
 
 @Data
 class ContentUz extends ManageLang {
-
-
-
-    public static final String start_header = "Salom";
+    ContentUz(){
+        start_header = "Salom O'zbek tilini tanladingiz";
+        sign_in = "registratsiyadan oting ";
+    }
 }
 
 

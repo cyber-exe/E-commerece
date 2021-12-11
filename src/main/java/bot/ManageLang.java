@@ -1,15 +1,22 @@
 package bot;
 
 abstract class ManageLang {
-
-     static ManageLang getContent(String lang){
-        if(lang.equals("Uzbek")){
-            ContentTemp temp = (ContentTemp) new ContentUz();
-        }else if (lang.equals("Russian")){
-            return new ContentRu();
-
-        }else return new ContentEng();
+    public String start_header;
+    public String sign_in;
 
 
-    }
+
+
+
+
+//     static ManageLang getContent(String lang){
+//        if(lang.equals("Uzbek")){
+//            return new ContentUz();
+//        }else if (lang.equals("Russian")){
+//            return new ContentRu();
+//
+//        }else return new ContentEng();
+//
+//
+//    }
 }

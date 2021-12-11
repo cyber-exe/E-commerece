@@ -16,7 +16,15 @@ import java.util.List;
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String chatId;
     private String message;
-    private String lang;
+    private int idx = 0;
+    List<ManageLang> manageLangList = new ArrayList<>();
+
+    public TgBot(){
+        manageLangList.add(new ContentUz());//0
+        manageLangList.add(new ContentRu());//1
+        manageLangList.add(new ContentEng());//2
+    }
+
 
     @Override
     public String getBotUsername() {
@@ -41,11 +49,14 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 this.execute(langMenu(), this.message);
             } else if(text.equals("Uzbek")) {
-
-                this.execute(mainMenu(new ContentUz()) , ContentUz.start_header);
-            } else if(text.equals("English")) {
-
-
+                idx = 0;
+                this.execute(mainMenu() , manageLangList.get(idx).start_header);
+            } else if(text.equals("Russian")) {
+                idx = 1;
+                this.execute(mainMenu() , manageLangList.get(idx).start_header);
+            } else {
+                idx = 2;
+                this.execute(mainMenu() , manageLangList.get(idx).start_header);
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
@@ -55,20 +66,16 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    public InlineKeyboardMarkup mainMenu(ManageLang language) {
-        ContentTemp temp = new ContentTemp();
-        if(language instanceof ContentUz)
-                temp = new ContentUz();
-
+    public InlineKeyboardMarkup mainMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> list = new ArrayList<>();
 
         inlineKeyboardMarkup.setKeyboard(list);
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText(language.getContent().st);
+        inlineKeyboardButton.setText(manageLangList.get(idx).sign_in);
 
-        inlineKeyboardButton.setCallbackData(L);
+        inlineKeyboardButton.setCallbackData("adsfadf");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
@@ -94,7 +101,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         keyboardRow.add("Uzbek");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("Русский");
+        keyboardRow1.add("Russian");
 
         KeyboardRow keyboardRow2 = new KeyboardRow();
         keyboardRow2.add("English");
