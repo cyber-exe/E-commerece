@@ -107,10 +107,6 @@ public class CardService implements BaseService<Card, String> {
         BaseService.super.toJson(list, path);
     }
 
-    @Override
-    public List<Card> listFromJson(List<Card> list, String path) throws Exception {
-        return BaseService.super.listFromJson(list, path);
-    }
 
     public List<Card> listFromJson(String path) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();

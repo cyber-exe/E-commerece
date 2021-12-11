@@ -17,13 +17,14 @@ import java.util.UUID;
 
 
 public class BuyerService implements BaseService<Buyer, String> {
-    List<Buyer> buyers = new ArrayList<>();
+    List<Buyer> buyers;
 
     {
         try {
             this.buyers = listFromJson(Root.buyersPath);
         } catch (Exception e) {
             e.printStackTrace();
+            buyers = new ArrayList<>();
         }
     }
 
@@ -101,29 +102,31 @@ public class BuyerService implements BaseService<Buyer, String> {
         return false;
     }
 
-    @Override
-    public void toJson(List<Buyer> list, String path) throws IOException {
-        BaseService.super.toJson(list, path);
-    }
+
 
     @Override
-    public List<Buyer> listFromJson(List<Buyer> list, String path) throws Exception {
-        return BaseService.super.listFromJson(list, path);
-    }
-
     public List<Buyer> listFromJson(String path) {
         //return BaseService.super.listFromJson(list, path);
 
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            byte[] bytes = Files.readAllBytes(new File(path).toPath());
-            String str = new String(bytes);
-            objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 
-            return objectMapper.readValue(str, new TypeReference<List<Buyer>>() {});
+//            byte[] bytes = Files.readAllBytes(new File(path).toPath());
+//            String str = new String(bytes);
+//            objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
+
+            return objectMapper.readValue(new File(path), new TypeReference<List<Buyer>>() {
+            });
         } catch (Exception e) {
             return null;
         }
     }
+
+    @Override
+    public void toJson(List<Buyer> list, String path) throws IOException {
+        BaseService.super.toJson(list, path);
+    }
+
+
 
 }
