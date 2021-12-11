@@ -119,10 +119,7 @@ public class BasketService implements BaseService<Basket, String> {
     private List<Basket> listFromJson(String basketsPath) {
         ObjectMapper objectMapper = new ObjectMapper();
         try{
-            byte[] bytes = Files.readAllBytes(new File(basketsPath).toPath());
-            String str = new String(bytes);
-
-            return objectMapper.readValue(str, new TypeReference<List<Basket>>() {});
+            return objectMapper.readValue(new File(basketsPath), new TypeReference<List<Basket>>() {});
         }catch (Exception e){
             return null;
         }

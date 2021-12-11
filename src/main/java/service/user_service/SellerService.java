@@ -116,11 +116,7 @@ public class SellerService implements BaseService<Seller, String> {
     private List<Seller> listFromJson(String sellersPath) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            byte[] bytes = Files.readAllBytes(new File(sellersPath).toPath());
-            String str = new String((bytes));
-            objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
-            return objectMapper.readValue(str, new TypeReference<List<Seller>>(){});
+            return objectMapper.readValue(new File(sellersPath), new TypeReference<List<Seller>>(){});
 
         } catch (IOException e) {
             return null;
