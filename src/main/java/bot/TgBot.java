@@ -30,21 +30,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
     @Override
     public void onUpdateReceived(Update update) {
-        this.chatId = update.getMessage().getChatId().toString();
-        SendMessage s = new SendMessage();
-        if(update.hasCallbackQuery()) {
-            s.setText(update.getCallbackQuery().getData());
-            s.setChatId(this.chatId);
-
-            try {
-                super.execute(s);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
-        }
-
 
         if(update.hasMessage()) {
+            this.chatId = update.getMessage().getChatId().toString();
+
             String text = update.getMessage().getText();
 
             if(text.equals("/start")) {
@@ -53,21 +42,20 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 this.execute();
             }
         } else if(update.hasCallbackQuery()) {
-//            this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
+            this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
 //            this.message = update.getCallbackQuery().getData();
 //            this.execute();
-            CallbackQuery callbackQuery = new CallbackQuery();
-            String data = callbackQuery.getData();
+            String data = update.getCallbackQuery().getData();
+            System.out.println(data);
 
-            try {
-
-                SendMessage send = new SendMessage();
-                send.setText(update.getCallbackQuery().getData());
-                send.setChatId(this.chatId);
-                super.execute(send);
-            } catch (TelegramApiException e) {
-                e.printStackTrace();
-            }
+//            try {
+//                SendMessage send = new SendMessage();
+//                send.setText(data);
+//                send.setChatId(update.getCallbackQuery().);
+//                super.execute(send);
+//            } catch (TelegramApiException e) {
+//                e.printStackTrace();
+//            }
         }
     }
 
