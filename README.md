@@ -36,7 +36,7 @@ Please make sure to update tests as appropriate.
 ## Team Members 🧔:
 + Bekzod Aka 🧔‍:
 + Husanboy Aka 👦:
-+ Alisher
++ [Alisher](alisher.kholmirzaev@gmail.com)
 + Muzaffar Aka 👨‍🦱:
 
 
