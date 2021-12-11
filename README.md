@@ -33,5 +33,11 @@ Please make sure to update tests as appropriate.
 
 ## License
 [The Best team]()
+## Team Members 🧔:
++ Bekzod Aka 🧔‍:
++ Husanboy Aka 👦:
++ Alisher
++ Muzaffar Aka 👨‍🦱:
+
 
 
