@@ -48,12 +48,6 @@
             <artifactId>telegrambots</artifactId>
             <version>5.4.0.1</version>
         </dependency>
-
-
-
-
-
-
     </dependencies>
 
 </project>

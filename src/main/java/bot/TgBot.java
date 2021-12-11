@@ -1,5 +1,6 @@
 package bot;
 
+
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -126,18 +127,6 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-//    private void execute(ReplyKeyboardMarkup menu) {
-//        SendMessage sendMessage = new SendMessage();
-//        sendMessage.setChatId(this.chatId);
-//        sendMessage.setReplyMarkup(menu);
-//
-//        try {
-//            super.execute(sendMessage);
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-//    }
-
     private void execute(InlineKeyboardMarkup menu, String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(text);
@@ -150,18 +139,6 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             e.printStackTrace();
         }
     }
-
-//    private void execute(InlineKeyboardMarkup menu) {
-//        SendMessage sendMessage = new SendMessage();
-//        sendMessage.setChatId(this.chatId);
-//        sendMessage.setReplyMarkup(menu);
-//
-//        try {
-//            super.execute(sendMessage);
-//        } catch (TelegramApiException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void execute(String text) {
         SendMessage sendMessage = new SendMessage();
