@@ -50,19 +50,19 @@ public class Main {
 //        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 //        List<Buyer> buyer = objectMapper.readValue(str, new TypeReference<List<Buyer>>() {});
 //        System.out.println("node" + buyer.get(0));
-//
-//        BuyerService buyerService = new BuyerService();
-//
-//        List<Buyer> list = buyerService.getList();
-//        for (Buyer buyer : list) {
-//            System.out.println(buyer.toString());
-//        }
-//        Buyer buyer = new Buyer();
-//        //buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
-//        buyer.setName("ALISHER");
-//        buyer.setEmail("BEK");
-//        buyer.setPhone("000");
-//        buyerService.add(buyer);
+
+        BuyerService buyerService = new BuyerService();
+
+        List<Buyer> list = buyerService.getList();
+        for (Buyer buyer : list) {
+            System.out.println(buyer.toString());
+        }
+        Buyer buyer = new Buyer();
+        //buyer.setId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
+        buyer.setName("ALISHER");
+        buyer.setEmail("BEK");
+        buyer.setPhone("000");
+        buyerService.add(buyer);
 
         /*
         CardService cardService = new CardService();
