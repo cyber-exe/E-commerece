@@ -8,7 +8,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.inlinequery.result.InlineQueryResult;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 
 import java.util.ArrayList;
@@ -17,6 +19,7 @@ import java.util.List;
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String chatId;
     private String message;
+    private String lang;
 
     @Override
     public String getBotUsername() {
@@ -30,45 +33,25 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
     @Override
     public void onUpdateReceived(Update update) {
-
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
 
             String text = update.getMessage().getText();
 
             if(text.equals("/start")) {
-                this.message = "Assalomu alaykum. Siz Savdozon telegram botiga kirdingiz!";
+                this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
 
-                this.execute();
+                this.execute(langMenu(), this.message);
+            } else if(text.equals("Uzbek")) {
+                this.execute(mainMenu(), "Tizimga kirish");
+            } else if(text.equals("English")) {
+
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
-//            this.message = update.getCallbackQuery().getData();
-//            this.execute();
             String data = update.getCallbackQuery().getData();
-            System.out.println(data);
 
-//            try {
-//                SendMessage send = new SendMessage();
-//                send.setText(data);
-//                send.setChatId(update.getCallbackQuery().);
-//                super.execute(send);
-//            } catch (TelegramApiException e) {
-//                e.printStackTrace();
-//            }
-        }
-    }
-
-    public void execute() {
-        SendMessage sendMessage = new SendMessage();
-        sendMessage.setText(this.message);
-        sendMessage.setChatId(this.chatId);
-        sendMessage.setReplyMarkup(mainMenu());
-
-        try {
-            super.execute(sendMessage);
-        } catch (TelegramApiException e) {
-            e.printStackTrace();
+            this.execute(data);
         }
     }
 
@@ -80,13 +63,13 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
         inlineKeyboardButton.setText("Kirish");
-        inlineKeyboardButton.setCallbackData("kirish");
+        inlineKeyboardButton.setCallbackData("SINGIN");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
         inlineKeyboardButton1.setText("Registratsiya");
-        inlineKeyboardButton1.setCallbackData("register");
+        inlineKeyboardButton1.setCallbackData("SIGNUP");
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
@@ -95,4 +78,88 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         return inlineKeyboardMarkup;
     }
+
+    public ReplyKeyboardMarkup langMenu() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+
+        KeyboardRow keyboardRow = new KeyboardRow();
+        keyboardRow.add("Uzbek");
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        keyboardRow1.add("Русский");
+
+        KeyboardRow keyboardRow2 = new KeyboardRow();
+        keyboardRow2.add("English");
+
+        keyboardRows.add(keyboardRow);
+        keyboardRows.add(keyboardRow1);
+        keyboardRows.add(keyboardRow2);
+
+        return replyKeyboardMarkup;
+    }
+
+    private void execute(ReplyKeyboardMarkup menu, String text) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(text);
+        sendMessage.setChatId(this.chatId);
+        sendMessage.setReplyMarkup(menu);
+
+        try {
+            super.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    private void execute(ReplyKeyboardMarkup menu) {
+//        SendMessage sendMessage = new SendMessage();
+//        sendMessage.setChatId(this.chatId);
+//        sendMessage.setReplyMarkup(menu);
+//
+//        try {
+//            super.execute(sendMessage);
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    private void execute(InlineKeyboardMarkup menu, String text) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setText(text);
+        sendMessage.setChatId(this.chatId);
+        sendMessage.setReplyMarkup(menu);
+
+        try {
+            super.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    private void execute(InlineKeyboardMarkup menu) {
+//        SendMessage sendMessage = new SendMessage();
+//        sendMessage.setChatId(this.chatId);
+//        sendMessage.setReplyMarkup(menu);
+//
+//        try {
+//            super.execute(sendMessage);
+//        } catch (TelegramApiException e) {
+//            e.printStackTrace();
+//        }
+//    }
+
+    private void execute(String text) {
+        SendMessage sendMessage = new SendMessage();
+        sendMessage.setChatId(this.chatId);
+        sendMessage.setText(text);
+
+        try {
+            super.execute(sendMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
 }
