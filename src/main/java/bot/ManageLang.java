@@ -1,9 +1,11 @@
 package bot;
 
 abstract class ManageLang {
-    public String start_header;
+    public String selected_lang;
+    public String main_header;
     public String sign_up;
     public String sign_in;
+    public String enter_email;
 
 
 

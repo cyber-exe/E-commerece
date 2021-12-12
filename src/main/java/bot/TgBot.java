@@ -1,29 +1,38 @@
 package bot;
 
 
+import lombok.SneakyThrows;
+import model.user.Buyer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import service.user_service.BuyerService;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String chatId;
     private String message;
     private String lang;
+    private State state;
+    private BuyerService buyerService;
+    private Buyer buyer;
+    private boolean checkFromData;
 
+    Stack<ReplyKeyboard> menues = new Stack<>();
     HashMap<String, ManageLang> manageLangList = new HashMap<String, ManageLang>();
 
     {
+        buyerService = new BuyerService();
+        buyer = new Buyer();
+        this.state = State.SELLECT_LANG;
         manageLangList.put("Uzbek", new ContentUz());
         manageLangList.put("Russian", new ContentRu());
         manageLangList.put("English", new ContentEng());
@@ -39,6 +48,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return BOT_TOKEN;
     }
 
+    @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage()) {
@@ -48,23 +58,69 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
+                this.menues.push(mainMenu());
+                this.state = State.REGISTER_MENU;
 
-                this.execute(langMenu(), this.message);
+                this.execute(this.message);
+                this.execute(mainMenu(), manageLangList.getOrDefault(this.lang, new ContentEng()).main_header);
             } else if(text.equals("Uzbek") || text.equals("Russian") || text.equals("English")) {
                 this.lang = text;
-                this.execute(mainMenu() , manageLangList.getOrDefault(text, new ContentEng()).start_header);
+                this.execute(manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
+//                if(this.menues.peek() instanceof InlineKeyboardMarkup) {
+//                    this.execute((InlineKeyboardMarkup) this.menues.peek(), manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
+//                } else {
+//                    this.execute((ReplyKeyboardMarkup) this.menues.peek(), manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
+//                }
+            } else if(this.state == State.ENTER_EMAIL) {
+                execute("sizning emailingiz: " + text);
+                buyer.setEmail(text);
+
+                this.state = State.ENTER_PHONE;
+                execute("Tel raqamizni kiriting");
+            } else if(this.state == State.ENTER_PHONE) {
+                execute("sizning tel raqamingiz: " + text);
+                buyer.setPhone(text);
+
+                if(this.checkFromData) {
+                    if(buyerService.check(buyer)) {
+                        this.state = State.BUYER_MENU;
+                    } else {
+                        execute(mainMenu(), "Kirilgan malumotlar xato, qayta urinib ko'ring!");
+                    }
+                } else {
+                    this.state = State.ENTER_AGE;
+                    execute("Yoshingizni kiriting: ");
+                }
+            } else if(this.state == State.ENTER_AGE) {
+                execute("sizning yoshingiz: " + text);
+
+                try {
+                    buyer.setAge(Integer.parseInt(text));
+                    buyerService.add(buyer);
+                } catch (NumberFormatException e) {
+                    execute("Yosh xato, qayta kiriting");
+                    e.printStackTrace();
+                }
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             String data = update.getCallbackQuery().getData();
 
-            this.execute(data);
+            if(State.SIGN_UP.toString().equals(data)) {
+                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
+                this.state = State.ENTER_EMAIL;
+
+            } else if(State.SIGN_IN.toString().equals(data)) {
+                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
+                this.state = State.ENTER_EMAIL;
+                this.checkFromData = true;
+            }
         }
     }
 
-    public void signIn() {
-
-    }
+//    public void signIn() {
+//
+//    }
 
     public InlineKeyboardMarkup mainMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -75,13 +131,13 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
         inlineKeyboardButton.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_in);
-        inlineKeyboardButton.setCallbackData("SIGNIN");
+        inlineKeyboardButton.setCallbackData("SIGN_IN");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
         inlineKeyboardButton1.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_up);
-        inlineKeyboardButton1.setCallbackData("SIGNUP");
+        inlineKeyboardButton1.setCallbackData("SIGN_UP");
 
 
         List<InlineKeyboardButton> row1 = new ArrayList<>();
