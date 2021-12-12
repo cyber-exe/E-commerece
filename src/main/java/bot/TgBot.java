@@ -1,6 +1,8 @@
 package bot;
 
 
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import lombok.Data;
 import lombok.SneakyThrows;
 import model.user.Buyer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -15,6 +17,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import service.user_service.BuyerService;
 
+import java.time.LocalDate;
 import java.util.*;
 
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
@@ -27,6 +30,8 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private boolean checkFromData;
 
     Stack<ReplyKeyboard> menues = new Stack<>();
+    Stack<String> headerOfMenu = new Stack<>();
+
     HashMap<String, ManageLang> manageLangList = new HashMap<String, ManageLang>();
 
     {
@@ -53,24 +58,25 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     public void onUpdateReceived(Update update) {
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
+            buyer.setName(update.getMessage().getFrom().getFirstName());
+            buyer.setSecondName(update.getMessage().getFrom().getLastName());
 
             String text = update.getMessage().getText();
 
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
+                String main_header = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
                 this.menues.push(mainMenu());
+                this.headerOfMenu.push(main_header);
                 this.state = State.REGISTER_MENU;
 
-                this.execute(this.message);
-                this.execute(mainMenu(), manageLangList.getOrDefault(this.lang, new ContentEng()).main_header);
+                this.execute(langMenu(), this.message);
+                this.execute(mainMenu(), main_header);
+
             } else if(text.equals("Uzbek") || text.equals("Russian") || text.equals("English")) {
                 this.lang = text;
                 this.execute(manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
-//                if(this.menues.peek() instanceof InlineKeyboardMarkup) {
-//                    this.execute((InlineKeyboardMarkup) this.menues.peek(), manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
-//                } else {
-//                    this.execute((ReplyKeyboardMarkup) this.menues.peek(), manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
-//                }
+
             } else if(this.state == State.ENTER_EMAIL) {
                 execute("sizning emailingiz: " + text);
                 buyer.setEmail(text);
@@ -83,7 +89,11 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 if(this.checkFromData) {
                     if(buyerService.check(buyer)) {
+                        String txt = "Savdozon telegram botiga muvaffaqiyatli kirdingiz!";
                         this.state = State.BUYER_MENU;
+                        this.menues.push(buyerMenu());
+                        this.headerOfMenu.push(txt);
+                        execute(buyerMenu(), txt);
                     } else {
                         execute(mainMenu(), "Kirilgan malumotlar xato, qayta urinib ko'ring!");
                     }
@@ -96,7 +106,13 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 try {
                     buyer.setAge(Integer.parseInt(text));
+                    buyer.setCreatedAt(LocalDate.now());
                     buyerService.add(buyer);
+                    String txt = "Savdozon telegram botiga muvaffaqiyatli kirdingiz!";
+                    this.state = State.BUYER_MENU;
+                    this.menues.push(buyerMenu());
+                    this.headerOfMenu.push(txt);
+                    execute(buyerMenu(), txt);
                 } catch (NumberFormatException e) {
                     execute("Yosh xato, qayta kiriting");
                     e.printStackTrace();
@@ -109,18 +125,60 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             if(State.SIGN_UP.toString().equals(data)) {
                 execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
                 this.state = State.ENTER_EMAIL;
-
             } else if(State.SIGN_IN.toString().equals(data)) {
                 execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
                 this.state = State.ENTER_EMAIL;
                 this.checkFromData = true;
+            } else if(data.equals("prev")) {
+                this.menues.pop();
+                this.headerOfMenu.pop();
+                if(this.menues.peek() instanceof InlineKeyboardMarkup) {
+                    this.execute((InlineKeyboardMarkup) this.menues.peek(), this.headerOfMenu.peek());
+                } else {
+                    this.execute((ReplyKeyboardMarkup) this.menues.peek(), this.headerOfMenu.peek());
+                }
             }
         }
     }
 
-//    public void signIn() {
-//
-//    }
+    public InlineKeyboardMarkup buyerMenu() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> list = new ArrayList<>();
+
+        inlineKeyboardMarkup.setKeyboard(list);
+
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+        inlineKeyboardButton.setText("Mahsulotlar");
+        inlineKeyboardButton.setCallbackData("productList");
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(inlineKeyboardButton);
+
+        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
+        inlineKeyboardButton1.setText("Mening savatcham");
+        inlineKeyboardButton1.setCallbackData("myBasket");
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(inlineKeyboardButton1);
+
+        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
+        inlineKeyboardButton2.setText("Men haqimda");
+        inlineKeyboardButton2.setCallbackData("myProfile");
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(inlineKeyboardButton2);
+
+        InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
+        inlineKeyboardButton3.setText("Orqaga");
+        inlineKeyboardButton3.setCallbackData("prev");
+        List<InlineKeyboardButton> row3 = new ArrayList<>();
+        row3.add(inlineKeyboardButton3);
+
+        list.add(row);
+        list.add(row1);
+        list.add(row2);
+        list.add(row3);
+
+        return inlineKeyboardMarkup;
+    }
 
     public InlineKeyboardMarkup mainMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -159,8 +217,6 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         replyKeyboardMarkup.setInputFieldPlaceholder("Language...");
 
         KeyboardRow keyboardRow = new KeyboardRow();
-        KeyboardButton button1 = new KeyboardButton();
-        button1.setText("Uzbek");
         keyboardRow.add("Uzbek");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();

@@ -6,6 +6,7 @@ abstract class ManageLang {
     public String sign_up;
     public String sign_in;
     public String enter_email;
+    public final String prev = "<=";
 
 
 
