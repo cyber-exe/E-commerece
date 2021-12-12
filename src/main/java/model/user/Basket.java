@@ -14,7 +14,6 @@ import java.util.UUID;
 @ToString(callSuper = true)
 
 public class Basket extends BaseModel {
-
     private UUID ownerId;
     private UUID productId;
 }

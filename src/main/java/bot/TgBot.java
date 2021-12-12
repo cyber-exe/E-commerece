@@ -65,7 +65,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
-                String main_header = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
+                String main_header = manageLangList.getOrDefault(this.lang, new ContentEng()).enter_to_system;
                 this.menues.push(mainMenu());
                 this.headerOfMenu.push(main_header);
                 this.state = State.REGISTER_MENU;
@@ -82,24 +82,24 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setEmail(text);
 
                 this.state = State.ENTER_PHONE;
-                execute("Tel raqamizni kiriting");
+                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_phone);
             } else if(this.state == State.ENTER_PHONE) {
                 execute("sizning tel raqamingiz: " + text);
                 buyer.setPhone(text);
 
                 if(this.checkFromData) {
                     if(buyerService.check(buyer)) {
-                        String txt = "Savdozon telegram botiga muvaffaqiyatli kirdingiz!";
+                        String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
                         this.state = State.BUYER_MENU;
                         this.menues.push(buyerMenu());
                         this.headerOfMenu.push(txt);
                         execute(buyerMenu(), txt);
                     } else {
-                        execute(mainMenu(), "Kirilgan malumotlar xato, qayta urinib ko'ring!");
+                        execute(mainMenu(), manageLangList.getOrDefault(this.lang, new ContentEng()).input_error);
                     }
                 } else {
                     this.state = State.ENTER_AGE;
-                    execute("Yoshingizni kiriting: ");
+                    execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_age);
                 }
             } else if(this.state == State.ENTER_AGE) {
                 execute("sizning yoshingiz: " + text);
@@ -108,7 +108,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     buyer.setAge(Integer.parseInt(text));
                     buyer.setCreatedAt(LocalDate.now());
                     buyerService.add(buyer);
-                    String txt = "Savdozon telegram botiga muvaffaqiyatli kirdingiz!";
+                    String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
                     this.state = State.BUYER_MENU;
                     this.menues.push(buyerMenu());
                     this.headerOfMenu.push(txt);
@@ -129,7 +129,15 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
                 this.state = State.ENTER_EMAIL;
                 this.checkFromData = true;
-            } else if(data.equals("prev")) {
+            } else if(data.equals("ABOUT_ME")) {
+//                List<List<InlineKeyboardButton>> l = new ArrayList<>();
+//                List<InlineKeyboardButton> row = new ArrayList<>();
+//                InlineKeyboardButton btn = new InlineKeyboardButton();
+//                btn.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).prev);
+//                btn.setCallbackData("PREV");
+
+                execute(buyer.toString());
+            } else if(data.equals("PREV")) {
                 this.menues.pop();
                 this.headerOfMenu.pop();
                 if(this.menues.peek() instanceof InlineKeyboardMarkup) {
@@ -149,26 +157,26 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-        inlineKeyboardButton.setText("Mahsulotlar");
-        inlineKeyboardButton.setCallbackData("productList");
+        inlineKeyboardButton.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).products);
+        inlineKeyboardButton.setCallbackData("PRODUCT_LIST");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText("Mening savatcham");
-        inlineKeyboardButton1.setCallbackData("myBasket");
+        inlineKeyboardButton1.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).my_basket);
+        inlineKeyboardButton1.setCallbackData("MY_BASKET");
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
         InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
-        inlineKeyboardButton2.setText("Men haqimda");
-        inlineKeyboardButton2.setCallbackData("myProfile");
+        inlineKeyboardButton2.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).about_me);
+        inlineKeyboardButton2.setCallbackData("ABOUT_ME");
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         row2.add(inlineKeyboardButton2);
 
         InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
-        inlineKeyboardButton3.setText("Orqaga");
-        inlineKeyboardButton3.setCallbackData("prev");
+        inlineKeyboardButton3.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).prev);
+        inlineKeyboardButton3.setCallbackData("PREV");
         List<InlineKeyboardButton> row3 = new ArrayList<>();
         row3.add(inlineKeyboardButton3);
 
