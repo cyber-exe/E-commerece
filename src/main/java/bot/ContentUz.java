@@ -13,6 +13,7 @@ class ContentUz extends ManageLang {
         enter_email = "Elektron pochtangizni kiriting: ";
         enter_phone = "Tel. raqamingizni kiriting: ";
         enter_age = "Yoshingizni kiriting: ";
+        select_gender = "Jinsingizni tanlang: ";
         about_me = "Men haqimda";
         my_basket = "Mening savatcham";
         products = "Mahsulotlar";

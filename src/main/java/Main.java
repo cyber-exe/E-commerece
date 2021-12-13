@@ -28,13 +28,18 @@ public class Main {
 
     public static void main(String[] args) throws IOException, TelegramApiException {
 //        System.out.println("Hello ");
-//        Buyer buyer = new Buyer();
-//        buyer.setName("dsa");
-//        buyer.setEmail("husan");
-//        buyer.setPhone("123");
-//        List<Buyer> l1 = new ArrayList<>();
-//        l1.add(buyer);
-//        ObjectMapper objectMapper = new ObjectMapper();
+        BuyerService buyerService = new BuyerService();
+        Buyer buyer = new Buyer();
+        buyer.setName("dsa");
+        buyer.setEmail("husan");
+        buyer.setPhone("123");
+        buyerService.add(buyer);
+
+        Buyer buyer1 = new Buyer();
+        buyer1.setName("hello");
+        buyerService.add(buyer1);
+
+//          ObjectMapper objectMapper = new ObjectMapper();
 //        String str = objectMapper.writeValueAsString(l1);
 //        System.out.println(str);
 //
@@ -50,7 +55,7 @@ public class Main {
 //        objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
 //        List<Buyer> buyer = objectMapper.readValue(str, new TypeReference<List<Buyer>>() {});
 //        System.out.println("node" + buyer.get(0));
-//
+
 //        BuyerService buyerService = new BuyerService();
 //
 //        List<Buyer> list = buyerService.getList();

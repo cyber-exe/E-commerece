@@ -1,17 +1,15 @@
 package service.user_service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import model.user.Buyer;
+import org.apache.poi.util.StringUtil;
 import service.BaseService;
 import service.paths.Root;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -19,18 +17,24 @@ import java.util.UUID;
 
 
 public class BuyerService implements BaseService<Buyer, String> {
-    List<Buyer> buyers = new ArrayList<>();
+    List<Buyer> buyers;
 
     {
         try {
-            this.buyers = listFromJson(Root.buyersPath);
+            this.buyers = Objects.requireNonNullElseGet(listFromJson(Root.buyersPath), ArrayList::new);
         } catch (Exception e) {
             e.printStackTrace();
+            buyers = new ArrayList<>();
         }
     }
 
+
     @Override
     public Buyer add(Buyer buyer) throws IOException {
+        this.buyers.add(buyer);
+        this.updateJson(this.buyers, Root.buyersPath);
+        return buyer;
+    }
         if(!this.check(buyer)) {
             buyer.setCreatedAt(LocalDate.now());
             buyers.add(buyer);
@@ -45,45 +49,20 @@ public class BuyerService implements BaseService<Buyer, String> {
 
     @Override
     public boolean delete(Buyer buyer) throws IOException {
-        int idx = 0;
-
-        for (Buyer buyer1 : buyers) {
-            if(buyer1.getId().equals(buyer.getId())) {
-                buyer.setActive(false);
-                buyers.set(idx, buyer);
-                this.toJson(buyers, Root.buyersPath);
-
-                return true;
-            }
-
-            idx++;
-        }
-
+        buyer.setActive(false);
+        this.updateJson(this.buyers, Root.buyersPath);
         return false;
     }
 
     @Override
     public Buyer edit(Buyer buyer) throws IOException {
-        if(buyer != null) {
-            int idx = 0;
-
-            for (Buyer buyer1 : buyers) {
-                if(buyer1.getId().equals(buyer.getId())) {
-                    Buyer res = buyers.set(idx, buyer);
-                    this.toJson(buyers, Root.buyersPath);
-
-                    return res;
-                }
-
-                idx++;
-            }
-        }
-        return null;
+        this.updateJson(this.buyers, Root.buyersPath);
+        return buyer;
     }
 
     @Override
     public Buyer get(UUID id) {
-        for (Buyer buyer : buyers) {
+        for (Buyer buyer : buyers){
             if(buyer.getId().equals(id))
                 return buyer;
         }
@@ -105,29 +84,22 @@ public class BuyerService implements BaseService<Buyer, String> {
         return false;
     }
 
-    @Override
-    public void toJson(List<Buyer> list, String path) throws IOException {
-        BaseService.super.toJson(list, path);
-    }
+
 
     @Override
-    public List<Buyer> listFromJson(List<Buyer> list, String path) throws Exception {
-        return BaseService.super.listFromJson(list, path);
-    }
-
     public List<Buyer> listFromJson(String path) {
-        //return BaseService.super.listFromJson(list, path);
-
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            byte[] bytes = Files.readAllBytes(new File(path).toPath());
-            String str = new String(bytes);
-            objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
-            return objectMapper.readValue(str, new TypeReference<List<Buyer>>() {});
+            return objectMapper.readValue(new File(path), new TypeReference<List<Buyer>>() {
+            });
         } catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }
 
+    @Override
+    public void updateJson(List<Buyer> list, String path) throws IOException {
+        BaseService.super.updateJson(list, path);
+    }
 }

@@ -7,6 +7,8 @@ import lombok.ToString;
 import model.BaseModel;
 import model.product.Product;
 
+import java.util.Date;
+
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +17,4 @@ import model.product.Product;
 public class History extends BaseModel {
     private Product product;
     private Buyer buyer;
-
-
-
 }

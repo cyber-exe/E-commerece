@@ -18,21 +18,9 @@ public interface BaseService<I,T> {
     I get(UUID id);
     List<I> getList();
     boolean check(I i);
-
-
-    default void toJson(List<I> list, String path) throws IOException {
+    List<I> listFromJson(String path) throws Exception;
+    default void updateJson(List<I> list, String path) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), list);
-    }
-
-    default List<I> listFromJson(List<I> list, String path) throws Exception{
-            ObjectMapper objectMapper = new ObjectMapper();
-        try {
-            List<I> helper = objectMapper.readValue(new File(path), new TypeReference<List<I>>() {});
-            list = helper;
-            return list;
-        } catch (Exception e) {
-            return null;
-        }
     }
 }

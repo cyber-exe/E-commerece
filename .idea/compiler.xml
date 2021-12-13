@@ -7,11 +7,11 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="E-commerece" />
         <module name="E-commerce" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel>
+      <module name="E-commerce" target="17" />
       <module name="E-commerece" target="17" />
     </bytecodeTargetLevel>
   </component>
