@@ -7,6 +7,7 @@ import lombok.SneakyThrows;
 import model.user.Buyer;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Contact;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -15,6 +16,7 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiValidationException;
 import service.user_service.BuyerService;
 
 import java.time.LocalDate;
@@ -62,6 +64,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             buyer.setSecondName(update.getMessage().getFrom().getLastName());
 
             String text = update.getMessage().getText();
+            String contact = update.getMessage().getContact().getPhoneNumber();
 
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
@@ -82,10 +85,11 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setEmail(text);
 
                 this.state = State.ENTER_PHONE;
-                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_phone);
+
+                execute(getContact(), manageLangList.getOrDefault(this.lang, new ContentEng()).enter_phone);
             } else if(this.state == State.ENTER_PHONE) {
-                execute("sizning tel raqamingiz: " + text);
-                buyer.setPhone(text);
+                execute("sizning tel raqamingiz: " + contact);
+                buyer.setPhone(contact);
 
                 if(this.checkFromData) {
                     if(buyerService.check(buyer)) {
@@ -147,6 +151,29 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 }
             }
         }
+    }
+
+    public ReplyKeyboardMarkup getContact(){
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        replyKeyboardMarkup.setInputFieldPlaceholder("Share contact...");
+
+        KeyboardRow keyboardRow = new KeyboardRow();
+        KeyboardButton btn = new KeyboardButton();
+        btn.setText("My contact");
+        btn.setRequestContact(true);
+        keyboardRow.add(btn);
+
+
+        keyboardRows.add(keyboardRow);
+
+        return replyKeyboardMarkup;
+
+
     }
 
     public InlineKeyboardMarkup buyerMenu() {

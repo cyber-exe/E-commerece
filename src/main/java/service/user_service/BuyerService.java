@@ -11,7 +11,9 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,8 +32,10 @@ public class BuyerService implements BaseService<Buyer, String> {
     @Override
     public Buyer add(Buyer buyer) throws IOException {
         if(!this.check(buyer)) {
+            buyer.setCreatedAt(LocalDate.now());
             buyers.add(buyer);
             this.toJson(buyers, Root.buyersPath);
+
 
             return buyer;
         }
