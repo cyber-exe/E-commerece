@@ -40,7 +40,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     {
         buyerService = new BuyerService();
         userService = new UserService();
-        this.state = State.SELLECT_LANG;
+        this.state = State.SELECT_LANG;
         manageLangList.put("UZBEK", new ContentUz());
         manageLangList.put("RUSSIAN", new ContentRu());
         manageLangList.put("ENGLISH", new ContentEng());
@@ -71,28 +71,46 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
-                this.execute(langMenu(), this.message);
+                this.send(langMenu(), this.message);
             }
         } else if(update.hasCallbackQuery()) {
+
+
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             String data = update.getCallbackQuery().getData();
-//            update.getCallbackQuery().getMessage().getMessageId();
+            int msgId = update.getCallbackQuery().getMessage().getMessageId();
+
             if(data.equals("UZBEK") || data.equals("RUSSIAN") || data.equals("ENGLISH")) {
                 buyer.setLan(data);
                 buyer.setState(State.MAIN_MENU);
                 buyerService.edit(buyer);
-                execute(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
-                execute(buyer.toString());
+                send(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
+                send(buyer.toString());
                 this.state = State.MAIN_MENU;
-                EditMessageText editMessageText = new EditMessageText();
-                editMessageText.setText("Main menu");
-                editMessageText.setChatId(this.chatId);
-                editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
-                editMessageText.setReplyMarkup(mainMenu());
-                super.execute(editMessageText);
+
+                edit(msgId, mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+            } else if(data.equals("SETTINGS")) {
+                this.state = State.SETTINGS;
+
+                buyer.setState(State.SETTINGS);
+                buyerService.edit(buyer);
+
+                edit(msgId, settingsMenu(), "Sozlamalar");
+            } else if(data.equals("SELECT_LANG")) {
+                this.state = State.SELECT_LANG;
+
+                buyer.setState(State.SELECT_LANG);
+                buyerService.edit(buyer);
+                edit(msgId, langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
+            } else if(data.equals("PREV")) {
+                if(buyer.getState() == State.SETTINGS) {
+                    edit(msgId, mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                }
             }
         }
     }
+
+
 
     public InlineKeyboardMarkup buyerMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
@@ -197,6 +215,37 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return inlineKeyboardMarkup;
     }
 
+    public InlineKeyboardMarkup settingsMenu() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> list = new ArrayList<>();
+
+        inlineKeyboardMarkup.setKeyboard(list);
+
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+        inlineKeyboardButton.setText("Mening malumotlarim");
+        inlineKeyboardButton.setCallbackData("MY_PROFILE");
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(inlineKeyboardButton);
+
+        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
+        inlineKeyboardButton1.setText("Tilni o'zgartirish");
+        inlineKeyboardButton1.setCallbackData("SELECT_LANG");
+        row.add(inlineKeyboardButton1);
+
+
+        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
+        inlineKeyboardButton2.setText("<= Orqaga");
+        inlineKeyboardButton2.setCallbackData("PREV");
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(inlineKeyboardButton2);
+
+        list.add(row);
+        list.add(row1);
+
+        return inlineKeyboardMarkup;
+    }
+
     public ReplyKeyboardMarkup genderMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
@@ -222,7 +271,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return replyKeyboardMarkup;
     }
 
-    private void execute(ReplyKeyboardMarkup menu, String text) {
+    private void send(ReplyKeyboardMarkup menu, String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(text);
         sendMessage.setChatId(this.chatId);
@@ -235,7 +284,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void execute(InlineKeyboardMarkup menu, String text) {
+    private void send(InlineKeyboardMarkup menu, String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(text);
         sendMessage.setChatId(this.chatId);
@@ -248,7 +297,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void execute(String text) {
+    private void send(String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(this.chatId);
         sendMessage.setText(text);
@@ -260,4 +309,30 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
+    private void edit(int editedId, InlineKeyboardMarkup menu, String text) {
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(this.chatId);
+        editMessageText.setText(text);
+        editMessageText.setMessageId(editedId);
+        editMessageText.setReplyMarkup(menu);
+
+        try {
+            super.execute(editMessageText);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void edit(int editedId, String text) {
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(this.chatId);
+        editMessageText.setText(text);
+        editMessageText.setMessageId(editedId);
+
+        try {
+            super.execute(editMessageText);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
 }

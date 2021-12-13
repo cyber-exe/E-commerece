@@ -2,7 +2,7 @@ package bot;
 
 public enum State {
     START,
-    SELLECT_LANG,
+    SELECT_LANG,
     MAIN_MENU,
     SIGN_UP,
     ENTER_AGE,
@@ -11,5 +11,7 @@ public enum State {
     ENTER_GENDER,
     SIGN_IN,
     SELLER_MENU,
-    BUYER_MENU
+    BUYER_MENU,
+    MY_PROFILE,
+    SETTINGS
 }
