@@ -28,16 +28,16 @@ public class Main {
 
     public static void main(String[] args) throws IOException, TelegramApiException {
 //        System.out.println("Hello ");
-        BuyerService buyerService = new BuyerService();
-        Buyer buyer = new Buyer();
-        buyer.setName("dsa");
-        buyer.setEmail("husan");
-        buyer.setPhone("123");
-        buyerService.add(buyer);
-
-        Buyer buyer1 = new Buyer();
-        buyer1.setName("hello");
-        buyerService.add(buyer1);
+//        BuyerService buyerService = new BuyerService();
+//        Buyer buyer = new Buyer();
+//        buyer.setName("dsa");
+//        buyer.setEmail("husan");
+//        buyer.setPhone("123");
+//        buyerService.add(buyer);
+//
+//        Buyer buyer1 = new Buyer();
+//        buyer1.setName("hello");
+//        buyerService.add(buyer1);
 
 //          ObjectMapper objectMapper = new ObjectMapper();
 //        String str = objectMapper.writeValueAsString(l1);
