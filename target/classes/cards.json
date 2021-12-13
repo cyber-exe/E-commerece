@@ -1,0 +1,13 @@
+[ {
+  "id" : "5f65b95d-92be-4255-aee5-b21c74c25372",
+  "name" : null,
+  "createdAt" : null,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "cardNum" : "123456789",
+  "expireDate" : null,
+  "balance" : null,
+  "ownerId" : "a555823b-c4b2-42ee-a19b-e870d4b4b98f",
+  "active" : true
+} ]
