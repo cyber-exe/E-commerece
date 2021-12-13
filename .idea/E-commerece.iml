@@ -25,6 +25,8 @@
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-annotations:2.13.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.core:jackson-core:2.13.0" level="project" />
     <orderEntry type="library" name="Maven: com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.13.0" level="project" />
+<<<<<<<<< Temporary merge branch 1
+=========
     <orderEntry type="library" name="Maven: org.telegram:telegrambots:5.0.1" level="project" />
     <orderEntry type="library" name="Maven: org.telegram:telegrambots-meta:5.0.1" level="project" />
     <orderEntry type="library" name="Maven: com.google.guava:guava:30.0-jre" level="project" />
@@ -67,5 +69,6 @@
     <orderEntry type="library" name="Maven: commons-logging:commons-logging:1.2" level="project" />
     <orderEntry type="library" name="Maven: org.apache.httpcomponents:httpmime:4.5.13" level="project" />
     <orderEntry type="library" name="Maven: commons-io:commons-io:2.8.0" level="project" />
+>>>>>>>>> Temporary merge branch 2
   </component>
 </module>

@@ -1,16 +1,14 @@
 package model.user;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.*;
 import model.BaseModel;
 
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
-@ToString(callSuper = true)
+//@ToString(callSuper = true)
 @JsonInclude(JsonInclude.Include.NON_NULL)
 
 public class Buyer extends BaseModel {
@@ -23,4 +21,15 @@ public class Buyer extends BaseModel {
     private long chatId;
     private long massageId;
     private String lan;
+
+    @Override
+    public String toString() {
+        return  "name: " + super.getName() +
+                "\nsecondName: " + secondName +
+                "\nage: " + age +
+                "\ngender: " + gender +
+                "\nphone: " + phone +
+                "\nemail: " + email +
+                "\npassword: " + password;
+    }
 }
