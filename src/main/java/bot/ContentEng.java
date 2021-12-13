@@ -10,9 +10,8 @@ class ContentEng extends ManageLang{
         sign_in = "Sign in";
         sign_up = "Sign up";
         enter_email = "Enter own email: ";
-        enter_phone = "Enter own phone: ";
+        enter_phone = "Share your phone: ";
         enter_age = "Enter own age: ";
-        select_gender = "Select your gender";
         about_me = "About me";
         my_basket = "My basket";
         products = "Products";

@@ -12,7 +12,7 @@ import java.util.SplittableRandom;
 import java.util.UUID;
 
 public interface BaseService<I,T> {
-    I add(I i) throws IOException;
+    I add(I i) throws Exception;
     boolean delete(I i) throws IOException;
     I edit(I i) throws IOException;
     I get(UUID id);
