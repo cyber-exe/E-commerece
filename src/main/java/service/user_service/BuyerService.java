@@ -10,10 +10,7 @@ import service.paths.Root;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 
 public class BuyerService implements BaseService<Buyer, String> {
@@ -35,17 +32,8 @@ public class BuyerService implements BaseService<Buyer, String> {
         this.updateJson(this.buyers, Root.buyersPath);
         return buyer;
     }
-        if(!this.check(buyer)) {
-            buyer.setCreatedAt(LocalDate.now());
-            buyers.add(buyer);
-            this.toJson(buyers, Root.buyersPath);
 
 
-            return buyer;
-        }
-
-        return null;
-    }
 
     @Override
     public boolean delete(Buyer buyer) throws IOException {
