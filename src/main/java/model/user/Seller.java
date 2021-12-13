@@ -1,5 +1,6 @@
 package model.user;
 
+import bot.State;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -26,4 +27,5 @@ public class Seller extends BaseModel {
     private long chatId;
     private long massageId;
     private String lan;
+    private State state;
 }

@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.*;
 import model.BaseModel;
 
+import java.util.Date;
+import java.util.UUID;
+
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
@@ -21,6 +24,11 @@ public class Buyer extends BaseModel {
     private long chatId;
     private long massageId;
     private String lan;
+
+    public Buyer(long chatId, String name) {
+        super(UUID.randomUUID(), name, true, new Date(), new Date(), null, null);
+        this.chatId = chatId;
+    }
 
     @Override
     public String toString() {
