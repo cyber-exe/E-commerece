@@ -5,9 +5,11 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
 import lombok.SneakyThrows;
 import model.user.Buyer;
+import model.user.Gender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Contact;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -16,7 +18,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiValidationException;
 import service.user_service.BuyerService;
 
 import java.time.LocalDate;
@@ -28,8 +29,8 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String lang;
     private State state;
     private BuyerService buyerService;
+    private UserService userService;
     private Buyer buyer;
-    private boolean checkFromData;
 
     Stack<ReplyKeyboard> menues = new Stack<>();
     Stack<String> headerOfMenu = new Stack<>();
@@ -38,11 +39,11 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
     {
         buyerService = new BuyerService();
-        buyer = new Buyer();
+        userService = new UserService();
         this.state = State.SELLECT_LANG;
-        manageLangList.put("Uzbek", new ContentUz());
-        manageLangList.put("Russian", new ContentRu());
-        manageLangList.put("English", new ContentEng());
+        manageLangList.put("UZBEK", new ContentUz());
+        manageLangList.put("RUSSIAN", new ContentRu());
+        manageLangList.put("ENGLISH", new ContentEng());
     }
 
     @Override
@@ -60,120 +61,37 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     public void onUpdateReceived(Update update) {
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
-            buyer.setName(update.getMessage().getFrom().getFirstName());
-            buyer.setSecondName(update.getMessage().getFrom().getLastName());
+
+            buyer = userService.getUserByChatId(update.getMessage().getChatId());
+
+            if(buyer == null)
+                buyer = buyerService.add(new Buyer(update.getMessage().getChatId(), update.getMessage().getFrom().getFirstName()));
 
             String text = update.getMessage().getText();
-            String contact = update.getMessage().getContact().getPhoneNumber();
 
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
-                String main_header = manageLangList.getOrDefault(this.lang, new ContentEng()).enter_to_system;
-                this.menues.push(mainMenu());
-                this.headerOfMenu.push(main_header);
-                this.state = State.REGISTER_MENU;
-
                 this.execute(langMenu(), this.message);
-                this.execute(mainMenu(), main_header);
-
-            } else if(text.equals("Uzbek") || text.equals("Russian") || text.equals("English")) {
-                this.lang = text;
-                this.execute(manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
-
-            } else if(this.state == State.ENTER_EMAIL) {
-                execute("sizning emailingiz: " + text);
-                buyer.setEmail(text);
-
-                this.state = State.ENTER_PHONE;
-
-                execute(getContact(), manageLangList.getOrDefault(this.lang, new ContentEng()).enter_phone);
-            } else if(this.state == State.ENTER_PHONE) {
-                execute("sizning tel raqamingiz: " + contact);
-                buyer.setPhone(contact);
-
-                if(this.checkFromData) {
-                    if(buyerService.check(buyer)) {
-                        String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
-                        this.state = State.BUYER_MENU;
-                        this.menues.push(buyerMenu());
-                        this.headerOfMenu.push(txt);
-                        execute(buyerMenu(), txt);
-                    } else {
-                        execute(mainMenu(), manageLangList.getOrDefault(this.lang, new ContentEng()).input_error);
-                    }
-                } else {
-                    this.state = State.ENTER_AGE;
-                    execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_age);
-                }
-            } else if(this.state == State.ENTER_AGE) {
-                execute("sizning yoshingiz: " + text);
-
-                try {
-                    buyer.setAge(Integer.parseInt(text));
-                    buyer.setCreatedAt(LocalDate.now());
-                    buyerService.add(buyer);
-                    String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
-                    this.state = State.BUYER_MENU;
-                    this.menues.push(buyerMenu());
-                    this.headerOfMenu.push(txt);
-                    execute(buyerMenu(), txt);
-                } catch (NumberFormatException e) {
-                    execute("Yosh xato, qayta kiriting");
-                    e.printStackTrace();
-                }
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             String data = update.getCallbackQuery().getData();
-
-            if(State.SIGN_UP.toString().equals(data)) {
-                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
-                this.state = State.ENTER_EMAIL;
-            } else if(State.SIGN_IN.toString().equals(data)) {
-                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
-                this.state = State.ENTER_EMAIL;
-                this.checkFromData = true;
-            } else if(data.equals("ABOUT_ME")) {
-//                List<List<InlineKeyboardButton>> l = new ArrayList<>();
-//                List<InlineKeyboardButton> row = new ArrayList<>();
-//                InlineKeyboardButton btn = new InlineKeyboardButton();
-//                btn.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).prev);
-//                btn.setCallbackData("PREV");
-
+//            update.getCallbackQuery().getMessage().getMessageId();
+            if(data.equals("UZBEK") || data.equals("RUSSIAN") || data.equals("ENGLISH")) {
+                buyer.setLan(data);
+                buyer.setState(State.MAIN_MENU);
+                buyerService.edit(buyer);
+                execute(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
                 execute(buyer.toString());
-            } else if(data.equals("PREV")) {
-                this.menues.pop();
-                this.headerOfMenu.pop();
-                if(this.menues.peek() instanceof InlineKeyboardMarkup) {
-                    this.execute((InlineKeyboardMarkup) this.menues.peek(), this.headerOfMenu.peek());
-                } else {
-                    this.execute((ReplyKeyboardMarkup) this.menues.peek(), this.headerOfMenu.peek());
-                }
+                this.state = State.MAIN_MENU;
+                EditMessageText editMessageText = new EditMessageText();
+                editMessageText.setText("Main menu");
+                editMessageText.setChatId(this.chatId);
+                editMessageText.setMessageId(update.getCallbackQuery().getMessage().getMessageId());
+                editMessageText.setReplyMarkup(mainMenu());
+                super.execute(editMessageText);
             }
         }
-    }
-
-    public ReplyKeyboardMarkup getContact(){
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(true);
-        replyKeyboardMarkup.setInputFieldPlaceholder("Share contact...");
-
-        KeyboardRow keyboardRow = new KeyboardRow();
-        KeyboardButton btn = new KeyboardButton();
-        btn.setText("My contact");
-        btn.setRequestContact(true);
-        keyboardRow.add(btn);
-
-
-        keyboardRows.add(keyboardRow);
-
-        return replyKeyboardMarkup;
-
-
     }
 
     public InlineKeyboardMarkup buyerMenu() {
@@ -223,42 +141,79 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-        inlineKeyboardButton.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_in);
-        inlineKeyboardButton.setCallbackData("SIGN_IN");
+        inlineKeyboardButton.setText("produkti");
+        inlineKeyboardButton.setCallbackData("PRODUCTS");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_up);
-        inlineKeyboardButton1.setCallbackData("SIGN_UP");
-
-
+        inlineKeyboardButton1.setText("Moya korzinka");
+        inlineKeyboardButton1.setCallbackData("MY_BASKET");
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
+        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
+        inlineKeyboardButton2.setText("Nastroyka");
+        inlineKeyboardButton2.setCallbackData("SETTINGS");
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(inlineKeyboardButton2);
+
         list.add(row);
         list.add(row1);
+        list.add(row2);
 
         return inlineKeyboardMarkup;
     }
 
-    public ReplyKeyboardMarkup langMenu() {
+    public InlineKeyboardMarkup langMenu() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> list = new ArrayList<>();
+
+        inlineKeyboardMarkup.setKeyboard(list);
+
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+
+        inlineKeyboardButton.setText("UZBEK");
+        inlineKeyboardButton.setCallbackData("UZBEK");
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(inlineKeyboardButton);
+
+        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
+        inlineKeyboardButton1.setText("RUSSIAN");
+        inlineKeyboardButton1.setCallbackData("RUSSIAN");
+        List<InlineKeyboardButton> row1 = new ArrayList<>();
+        row1.add(inlineKeyboardButton1);
+
+        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
+        inlineKeyboardButton2.setText("ENGLISH");
+        inlineKeyboardButton2.setCallbackData("ENGLISH");
+        List<InlineKeyboardButton> row2 = new ArrayList<>();
+        row2.add(inlineKeyboardButton2);
+
+        list.add(row);
+        list.add(row1);
+        list.add(row2);
+
+        return inlineKeyboardMarkup;
+    }
+
+    public ReplyKeyboardMarkup genderMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         replyKeyboardMarkup.setKeyboard(keyboardRows);
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setOneTimeKeyboard(true);
-        replyKeyboardMarkup.setInputFieldPlaceholder("Language...");
+        replyKeyboardMarkup.setInputFieldPlaceholder("The gender is...");
 
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("Uzbek");
+        keyboardRow.add("MALE");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("Russian");
+        keyboardRow1.add("FEMALE");
 
         KeyboardRow keyboardRow2 = new KeyboardRow();
-        keyboardRow2.add("English");
+        keyboardRow2.add("OTHERS");
 
         keyboardRows.add(keyboardRow);
         keyboardRows.add(keyboardRow1);
