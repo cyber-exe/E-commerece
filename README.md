@@ -34,10 +34,10 @@ Please make sure to update tests as appropriate.
 ## License
 [The Best team]()
 ## Team Members 🧔:
-+ Bekzod Aka 🧔‍:
-+ Husanboy Aka 👦:
++ [Bekzod Aka 🧔‍:](https://github.com/cyber-exe)
++ [Husanboy Aka 👦:](https://github.com/)
 + [Alisher 👦:](https://github.com/AleeWeeR/)
-+ Muzaffar Aka 👨‍🦱:
++ [Muzaffar Aka 👨‍🦱:](https://github.com/)
 
 
 
