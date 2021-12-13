@@ -16,4 +16,5 @@ public  interface Root {
     String basketsPath = basePath + "baskets.json";
     String historiesPath = basePath + "histories.json";
     String adminsPath = basePath + "admin.json";
+    String categoriesPath = basePath + "categories.json";
 }
