@@ -17,4 +17,5 @@ public  interface Root {
     String historiesPath = basePath + "histories.json";
     String adminsPath = basePath + "admin.json";
     String categoriesPath = basePath + "categories.json";
+    String subCategoriesPath = basePath + "subCategories.json";
 }
