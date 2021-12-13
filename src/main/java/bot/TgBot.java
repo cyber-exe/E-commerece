@@ -8,6 +8,8 @@ import model.user.Buyer;
 import model.user.Gender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
@@ -129,7 +131,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     execute(this.manageLangList.getOrDefault(this.lang, new ContentEng()).input_error);
                     e.printStackTrace();
                 }
-                buyer.setCreatedAt(LocalDate.now());
+                buyer.setCreatedAt(new Date());
                 buyerService.add(buyer);
                 String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
                 this.state = State.BUYER_MENU;

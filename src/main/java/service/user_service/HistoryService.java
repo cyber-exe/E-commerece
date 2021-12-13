@@ -1,5 +1,7 @@
 package service.user_service;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import model.user.History;
 import service.BaseService;
 import service.paths.Root;
