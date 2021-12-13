@@ -19,9 +19,7 @@ public interface BaseService<I,T> {
     List<I> getList();
     boolean check(I i);
     List<I> listFromJson(String path) throws Exception;
-
-
-    default void toJson(List<I> list, String path) throws IOException {
+    default void updateJson(List<I> list, String path) throws IOException {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.writerWithDefaultPrettyPrinter().writeValue(new File(path), list);
     }
