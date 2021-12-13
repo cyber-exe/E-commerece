@@ -5,6 +5,7 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
 import lombok.SneakyThrows;
 import model.user.Buyer;
+import model.user.Gender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
@@ -69,6 +70,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 this.menues.push(mainMenu());
                 this.headerOfMenu.push(main_header);
                 this.state = State.REGISTER_MENU;
+                this.checkFromData = false;
 
                 this.execute(langMenu(), this.message);
                 this.execute(mainMenu(), main_header);
@@ -106,17 +108,34 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 try {
                     buyer.setAge(Integer.parseInt(text));
-                    buyer.setCreatedAt(LocalDate.now());
-                    buyerService.add(buyer);
-                    String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
-                    this.state = State.BUYER_MENU;
-                    this.menues.push(buyerMenu());
-                    this.headerOfMenu.push(txt);
-                    execute(buyerMenu(), txt);
+                    this.state = State.ENTER_GENDER;
+                    execute(genderMenu(), this.manageLangList.getOrDefault(this.lang, new ContentEng()).select_gender);
                 } catch (NumberFormatException e) {
                     execute("Yosh xato, qayta kiriting");
                     e.printStackTrace();
                 }
+            } else if(this.state == State.ENTER_GENDER) {
+                if(Gender.MALE.toString().equals(text)) {
+                    execute("sizning sizning jinsingiz: erkak");
+                } else if(Gender.FEMALE.toString().equals(text)) {
+                    execute("sizning sizning jinsingiz: ayol");
+                } else {
+                    execute("sizning sizning jinsingiz: boshqa");
+                }
+
+                try {
+                    buyer.setGender(Gender.valueOf(text));
+                } catch (IllegalArgumentException e) {
+                    execute(this.manageLangList.getOrDefault(this.lang, new ContentEng()).input_error);
+                    e.printStackTrace();
+                }
+                buyer.setCreatedAt(LocalDate.now());
+                buyerService.add(buyer);
+                String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
+                this.state = State.BUYER_MENU;
+                this.menues.push(buyerMenu());
+                this.headerOfMenu.push(txt);
+                execute(buyerMenu(), txt);
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
@@ -232,6 +251,31 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         KeyboardRow keyboardRow2 = new KeyboardRow();
         keyboardRow2.add("English");
+
+        keyboardRows.add(keyboardRow);
+        keyboardRows.add(keyboardRow1);
+        keyboardRows.add(keyboardRow2);
+
+        return replyKeyboardMarkup;
+    }
+
+    public ReplyKeyboardMarkup genderMenu() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        replyKeyboardMarkup.setInputFieldPlaceholder("The gender is...");
+
+        KeyboardRow keyboardRow = new KeyboardRow();
+        keyboardRow.add("MALE");
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        keyboardRow1.add("FEMALE");
+
+        KeyboardRow keyboardRow2 = new KeyboardRow();
+        keyboardRow2.add("OTHERS");
 
         keyboardRows.add(keyboardRow);
         keyboardRows.add(keyboardRow1);

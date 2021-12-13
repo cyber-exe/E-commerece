@@ -12,6 +12,7 @@ class ContentRu extends ManageLang{
         enter_email = "Введите свою эл. почту: ";
         enter_phone = "Введите свой тел. номер: ";
         enter_age = "Введите свой возраст: ";
+        select_gender = "Выберите свой пол: ";
         about_me = "Обо мне";
         my_basket = "Моя корзинка";
         products = "Товары";

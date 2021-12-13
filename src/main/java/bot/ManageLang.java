@@ -8,6 +8,7 @@ abstract class ManageLang {
     public String enter_email;
     public String enter_phone;
     public String enter_age;
+    public String select_gender;
     public String about_me;
     public String my_basket;
     public String products;

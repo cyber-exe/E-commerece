@@ -8,7 +8,7 @@ public enum State {
     ENTER_AGE,
     ENTER_EMAIL,
     ENTER_PHONE,
-    AGE,
+    ENTER_GENDER,
     SIGN_IN,
     SELLER_MENU,
     BUYER_MENU
