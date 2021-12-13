@@ -1,27 +1,23 @@
 package service.user_service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import model.user.Buyer;
 import model.user.Card;
 import service.BaseService;
 import service.paths.Root;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 
 public class CardService implements BaseService<Card, String> {
-    List<Card> cards = new ArrayList<>();
+    List<Card> cards;
     {
         try {
-            List<Card> l;
-            if((l = listFromJson(Root.cardsPath)) != null)
-                this.cards = l;
+            Objects.requireNonNullElseGet(this.listFromJson(Root.cardsPath), ArrayList::new);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -30,49 +26,22 @@ public class CardService implements BaseService<Card, String> {
     public Card add(Card card) throws IOException {
         if(!this.check(card)) {
             this.cards.add(card);
-            this.toJson(this.cards, Root.cardsPath);
-
+            this.updateJson(this.cards, Root.cardsPath);
             return card;
         }
-
         return null;
     }
 
     @Override
     public boolean delete(Card card) throws IOException {
-        int idx = 0;
-
-        for (Card card1 : cards) {
-            if(card1.getId().equals(card.getId())) {
-                card.setActive(false);
-                cards.set(idx, card);
-                this.toJson(cards, Root.cardsPath);
-
-                return true;
-            }
-
-            idx++;
-        }
-
+        card.setActive(false);
+        this.updateJson(cards, Root.cardsPath);
         return false;
     }
 
     @Override
     public Card edit(Card card) throws IOException {
-        if(card != null) {
-            int idx = 0;
-
-            for (Card card1 : cards) {
-                if(card1.getId().equals(card.getId())) {
-                    Card res = cards.set(idx, card);
-                    this.toJson(cards, Root.cardsPath);
-
-                    return res;
-                }
-
-                idx++;
-            }
-        }
+        this.updateJson(cards, Root.cardsPath);
         return null;
     }
 
@@ -103,19 +72,15 @@ public class CardService implements BaseService<Card, String> {
     }
 
     @Override
-    public void toJson(List<Card> list, String path) throws IOException {
-        BaseService.super.toJson(list, path);
+    public void updateJson(List<Card> list, String path) throws IOException {
+        BaseService.super.updateJson(list, path);
     }
 
-
+    @Override
     public List<Card> listFromJson(String path) throws Exception {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            byte[] bytes = Files.readAllBytes(new File(path).toPath());
-            String str = new String(bytes);
-            objectMapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-
-            return objectMapper.readValue(str, new TypeReference<List<Card>>() {});
+            return objectMapper.readValue(new File(path), new TypeReference<List<Card>>() {});
         } catch (Exception e) {
             return null;
         }

@@ -20,4 +20,7 @@ public class Buyer extends BaseModel {
     private String phone;
     private String email;
     private String password;
+    private long chatId;
+    private long massageId;
+    private String lan;
 }

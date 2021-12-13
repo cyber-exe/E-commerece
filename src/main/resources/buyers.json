@@ -1,29 +1,15 @@
 [ {
-  "id" : "a555823b-c4b2-42ee-a19b-e870d4b4b98f",
-  "name" : "polvon",
-  "age" : 0,
-  "phone" : "777",
-  "email" : "xon",
-  "active" : true
-}, {
-  "id" : "75a8a4a9-443f-42b6-9cc1-3ae30eb0faf3",
-  "name" : "Bobur",
+  "id" : "4f30834e-8f5d-41b4-895e-b6edc906fec8",
+  "name" : "dsa",
+  "createdAt" : 1639224563164,
   "age" : 0,
   "phone" : "123",
-  "email" : "bobur",
+  "email" : "husan",
   "active" : true
 }, {
-  "id" : "0bba33ea-7e41-4cd4-9e85-696badc96329",
-  "name" : "Jasur",
+  "id" : "f9a3ebeb-f400-478d-a532-a99ff681913b",
+  "name" : "hello",
+  "createdAt" : 1639224563326,
   "age" : 0,
-  "phone" : "123",
-  "email" : "Jasur",
-  "active" : true
-}, {
-  "id" : "d7ab8863-8a56-4c9d-82d3-2011b9f9d9ff",
-  "name" : "ALISHER",
-  "age" : 0,
-  "phone" : "000",
-  "email" : "BEK",
   "active" : true
 } ]
