@@ -7,10 +7,7 @@ import service.paths.Root;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 public class AdminService implements BaseService<Admin, String>{
     List<Admin> admins;
@@ -24,8 +21,12 @@ public class AdminService implements BaseService<Admin, String>{
 
     @Override
     public Admin add(Admin admin) throws IOException {
-        this.admins.add(admin);
-        this.updateJson(admins, Root.adminsPath);
+        if (!this.check(admin)) {
+            admin.setCreatedAt(new Date());
+            this.admins.add(admin);
+            this.updateJson(admins, Root.adminsPath);
+            return admin;
+        }
         return null;
     }
 
@@ -38,6 +39,7 @@ public class AdminService implements BaseService<Admin, String>{
 
     @Override
     public Admin edit(Admin admin) throws IOException {
+        admin.setUpdatedAt(new Date());
         this.updateJson(admins, Root.adminsPath);
         return null;
     }
