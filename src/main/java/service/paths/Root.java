@@ -10,6 +10,7 @@ public  interface Root {
 
     //Alisher
     String basePath = "D:\\PDP-Unicorn\\JavaOOP\\ProjectsFromOthers\\E-commerece\\src\\main\\resources\\";
+
     String buyersPath = basePath + "buyers.json";
     String cardsPath = basePath + "cards.json";
     String sellersPath = basePath + "sellers.json";
@@ -18,4 +19,5 @@ public  interface Root {
     String adminsPath = basePath + "admin.json";
     String categoriesPath = basePath + "categories.json";
     String subCategoriesPath = basePath + "subCategories.json";
+    String languagesPath = basePath + "languages.json";
 }

@@ -1,4 +1,7 @@
 import bot.TgBot;
+import bot.language_service_json.Content;
+import bot.language_service_json.Language;
+import bot.language_service_json.LanguageService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -26,7 +29,7 @@ import java.util.UUID;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException, TelegramApiException {
+    public static void main(String[] args) throws Exception {
 //        System.out.println("Hello ");
 //        BuyerService buyerService = new BuyerService();
 //        Buyer buyer = new Buyer();
@@ -81,6 +84,17 @@ public class Main {
 //        card.setExpireDate(LocalDate.of(2020, 1, 8));
         card.setOwnerId(UUID.fromString("a555823b-c4b2-42ee-a19b-e870d4b4b98f"));
         cardService.add(card);*/
+        LanguageService languageService = new LanguageService();
+        Language language = new Language();
+        language.setLang("Uz");
+        List<Content> contentList = new ArrayList<>();
+        Content content = new Content();
+        content.setKey("Start");
+        content.setValue("Hello from other side");
+        contentList.add(content);
+        language.setContents(contentList);
+        languageService.add(language);
+
 
 
         TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);

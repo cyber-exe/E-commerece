@@ -24,4 +24,33 @@
   "chatId" : 883326966,
   "massageId" : 0,
   "active" : true
+}, {
+  "id" : "aeb1e06f-ab94-440a-b024-4cd2208a2e9c",
+  "name" : "\uD80C\uDD53 AleeWeeR \uD80C\uDD53",
+  "createdAt" : 1639421764576,
+  "age" : 0,
+  "chatId" : 1240972980,
+  "massageId" : 0,
+  "lan" : "UZBEK",
+  "state" : "MAIN_MENU",
+  "active" : true
+}, {
+  "id" : "b0ed3066-9801-4c38-bc93-9f4617913a34",
+  "name" : "\uD80C\uDD53 AleeWeeR \uD80C\uDD53",
+  "createdAt" : 1639421800628,
+  "age" : 0,
+  "chatId" : 1240972980,
+  "massageId" : 0,
+  "state" : "START",
+  "active" : true
+}, {
+  "id" : "c657814a-974b-4f11-86a4-65307009bcce",
+  "name" : "\uD80C\uDD53 AleeWeeR \uD80C\uDD53",
+  "createdAt" : 1639421806780,
+  "age" : 0,
+  "chatId" : 1240972980,
+  "massageId" : 0,
+  "lan" : "RUSSIAN",
+  "state" : "MAIN_MENU",
+  "active" : true
 } ]

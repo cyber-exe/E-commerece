@@ -1,7 +1,6 @@
 package bot;
 
 
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
 import lombok.SneakyThrows;
 import model.user.Buyer;
@@ -20,7 +19,6 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.Keyboard
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import service.user_service.BuyerService;
 
-import java.time.LocalDate;
 import java.util.*;
 
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
