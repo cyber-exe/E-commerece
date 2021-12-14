@@ -13,5 +13,9 @@ public enum State {
     SELLER_MENU,
     BUYER_MENU,
     MY_PROFILE,
-    SETTINGS
+    SETTINGS,
+    CATEGORY_LIST,
+    CATEGORY_MENU,
+
+    ENTER_CATEGORY_NAME
 }
