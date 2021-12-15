@@ -63,7 +63,7 @@ public class CategoryService implements BaseService<Category, String> {
         List<Category> list = new ArrayList<>();
 
         for (Category category : categoryList) {
-            if(!category.isActive())
+            if(category.isActive())
                 list.add(category);
         }
 

@@ -88,6 +88,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
             String text = update.getMessage().getText();
             delete(msgId);
+
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
                 this.send(langMenu(), this.message);
@@ -150,7 +151,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setMassageId(0);
                 buyerService.edit(buyer);
 
-                popup(callbackQueryId, data);
+                popup(callbackQueryId, manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang, true);
 
                 delete(msgId);
 
@@ -180,16 +181,18 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
             } else if(buyer.getState().equals(State.DELETE_CATEGORY)) {
-                this.state = State.CATEGORY_MENU;
-                buyer.setState(State.CATEGORY_MENU);
+                if(deleteCategory(data))
+                    popup(callbackQueryId, "The category is deleted!", false);
+                else
+                    popup(callbackQueryId, "The category is not deleted!", false);
+
+                delete(buyer.getMassageId());
+                send(categoryMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+
+                this.state = State.CATEGORY_LIST;
+                buyer.setState(State.CATEGORY_LIST);
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
-
-                if(deleteCategory(data))
-                    popup(callbackQueryId, "The category is deleted!");
-                else
-                    popup(callbackQueryId, "The category is not deleted!");
-                edit(msgId, manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
 
             } else if(data.equals("BACK")) {
                 if(buyer.getState() == State.CATEGORY_LIST) {
@@ -330,10 +333,12 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     }
 
     public boolean deleteCategory(String data) {
+
         for (Category category : categoryService.getList()) {
             if(data.equals(category.getId().toString())) {
                 try {
                     this.categoryService.delete(category);
+                    return true;
                 } catch (IOException e) {
                     send("Category with this name is not defined!");
                     e.printStackTrace();
@@ -345,10 +350,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return false;
     }
 
-    public void popup(String callbackQueryId, String data) {
+    public void popup(String callbackQueryId, String data, Boolean isAlert) {
         AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
-        answerCallbackQuery.setText(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
-        answerCallbackQuery.setShowAlert(true);
+        answerCallbackQuery.setText(data);
+        answerCallbackQuery.setShowAlert(isAlert);
         answerCallbackQuery.setCallbackQueryId(callbackQueryId);
 
         try {
