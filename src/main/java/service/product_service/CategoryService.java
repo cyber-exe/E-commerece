@@ -14,28 +14,28 @@ import java.util.Objects;
 import java.util.UUID;
 
 public class CategoryService implements BaseService<Category, String> {
-    List<Category> categoryServices ;
+    List<Category> categoryList ;
     {
         try {
-            this.categoryServices = Objects.requireNonNullElseGet(listFromJson(Root.categoriesPath), ArrayList::new);
+            this.categoryList = Objects.requireNonNullElseGet(listFromJson(Root.categoriesPath), ArrayList::new);
         }catch (Exception e){
             e.printStackTrace();
-            categoryServices = new ArrayList<>();
+            categoryList = new ArrayList<>();
         }
 
     }
 
     @Override
     public Category add(Category category) throws Exception {
-        this.categoryServices.add(category);
-        this.updateJson(this.categoryServices, Root.categoriesPath);
+        this.categoryList.add(category);
+        this.updateJson(this.categoryList, Root.categoriesPath);
         return category;
     }
 
     @Override
     public boolean delete(Category category) throws IOException {
         category.setActive(false);
-        this.updateJson(this.categoryServices, Root.categoriesPath);
+        this.updateJson(this.categoryList, Root.categoriesPath);
         return false;
     }
 
@@ -46,9 +46,8 @@ public class CategoryService implements BaseService<Category, String> {
 
     @Override
     public Category get(UUID id) {
-
         for (Category s :
-                categoryServices) {
+                categoryList) {
             if(s.getId().equals(id)) return s;
         }
         return null;
@@ -56,8 +55,21 @@ public class CategoryService implements BaseService<Category, String> {
 
     @Override
     public List<Category> getList() {
-        return this.categoryServices;
+        return this.categoryList;
     }
+
+    @Override
+    public List<Category> getActives() {
+        List<Category> list = new ArrayList<>();
+
+        for (Category category : categoryList) {
+            if(!category.isActive())
+                list.add(category);
+        }
+
+        return list;
+    }
+
 
     @Override
     public boolean check(Category category) {

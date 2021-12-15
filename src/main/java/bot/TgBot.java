@@ -9,6 +9,7 @@ import model.product.Category;
 import model.user.Buyer;
 import model.user.Gender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
@@ -25,6 +26,7 @@ import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import service.product_service.CategoryService;
 import service.user_service.BuyerService;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -64,6 +66,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     @Override
     public String getBotToken() {
         return BOT_TOKEN;
+    }
+
+    public TgBot() {
+        super();
     }
 
     @SneakyThrows
@@ -136,16 +142,20 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             String data = update.getCallbackQuery().getData();
             int msgId = update.getCallbackQuery().getMessage().getMessageId();
+            String callbackQueryId = update.getCallbackQuery().getId();
 
             if(data.equals("UZBEK") || data.equals("RUSSIAN") || data.equals("ENGLISH")) {
                 buyer.setLan(data);
                 buyer.setState(State.MAIN_MENU);
                 buyer.setMassageId(0);
                 buyerService.edit(buyer);
+
+                popup(callbackQueryId, data);
+
                 delete(msgId);
 
-                send(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
-                send(buyer.toString());
+               // send(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
+
                 this.state = State.MAIN_MENU;
 
                 send(mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
@@ -164,6 +174,23 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyerService.edit(buyer);
 
                 send("Enter category name: ");
+            } else if(data.equals("DELETE_CATEGORY")) {
+                this.state = State.DELETE_CATEGORY;
+                buyer.setState(State.DELETE_CATEGORY);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+            } else if(buyer.getState().equals(State.DELETE_CATEGORY)) {
+                this.state = State.CATEGORY_MENU;
+                buyer.setState(State.CATEGORY_MENU);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+
+                if(deleteCategory(data))
+                    popup(callbackQueryId, "The category is deleted!");
+                else
+                    popup(callbackQueryId, "The category is not deleted!");
+                edit(msgId, manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+
             } else if(data.equals("BACK")) {
                 if(buyer.getState() == State.CATEGORY_LIST) {
                     this.state = State.MAIN_MENU;
@@ -198,7 +225,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         List<List<InlineKeyboardButton>> list = new ArrayList<>();
 
-        for (Category category : categoryService.getList()) {
+        for (Category category : categoryService.getActives()) {
             if(this.buyer.getCurrentPage() * 10 - 10 == i)
                 getItem = true;
 
@@ -226,7 +253,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         list.add(pageRow());
         list.add(addCategory());
-        list.add(deleteCategory());
+        list.add(deleteCategoryBtn());
         list.add(back());
 
         inlineKeyboardMarkup.setKeyboard(list);
@@ -291,7 +318,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return row;
     }
 
-    public List<InlineKeyboardButton> deleteCategory() {
+    public List<InlineKeyboardButton> deleteCategoryBtn() {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
         inlineKeyboardButton.setText("Delete category");
         inlineKeyboardButton.setCallbackData("DELETE_CATEGORY");
@@ -300,6 +327,35 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         row.add(inlineKeyboardButton);
 
         return row;
+    }
+
+    public boolean deleteCategory(String data) {
+        for (Category category : categoryService.getList()) {
+            if(data.equals(category.getId().toString())) {
+                try {
+                    this.categoryService.delete(category);
+                } catch (IOException e) {
+                    send("Category with this name is not defined!");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    public void popup(String callbackQueryId, String data) {
+        AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
+        answerCallbackQuery.setText(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
+        answerCallbackQuery.setShowAlert(true);
+        answerCallbackQuery.setCallbackQueryId(callbackQueryId);
+
+        try {
+            super.execute(answerCallbackQuery);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
     }
 
     public ReplyKeyboardMarkup mainMenu() {
