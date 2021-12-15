@@ -59,6 +59,11 @@ public class HistoryService implements BaseService<History, String> {
     }
 
     @Override
+    public List<History> getActives() {
+        return null;
+    }
+
+    @Override
     public boolean check(History history) {
         return false;
     }

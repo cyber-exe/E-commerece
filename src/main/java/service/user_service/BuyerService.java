@@ -62,6 +62,11 @@ public class BuyerService implements BaseService<Buyer, String> {
         return this.buyers;
     }
 
+    @Override
+    public List<Buyer> getActives() {
+        return null;
+    }
+
 
     @Override
     public boolean check(Buyer buyer) {

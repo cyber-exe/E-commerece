@@ -12,11 +12,12 @@ import java.util.SplittableRandom;
 import java.util.UUID;
 
 public interface BaseService<I,T> {
-    I add(I i) throws IOException;
+    I add(I i) throws IOException, Exception;
     boolean delete(I i) throws IOException;
     I edit(I i) throws IOException;
     I get(UUID id);
     List<I> getList();
+    List<I> getActives();
     boolean check(I i);
     List<I> listFromJson(String path) throws Exception;
     default void updateJson(List<I> list, String path) throws IOException {

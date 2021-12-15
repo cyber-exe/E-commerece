@@ -1,0 +1,137 @@
+[ {
+  "id" : "d64b78f9-e058-40cc-af82-dadb626d3962",
+  "name" : "Elektronika",
+  "createdAt" : 1639464960697,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "072c8c6b-6264-4dd8-88e9-b8c0e184268d",
+  "name" : "ODEJDA",
+  "createdAt" : 1639465123710,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "140b4f7e-66c4-4861-aff9-d49c5ad75e60",
+  "name" : "salom",
+  "createdAt" : 1639466661084,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "3a655f62-fcc9-4f73-a840-181247ad73a9",
+  "name" : "wear",
+  "createdAt" : 1639466671888,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "f27ea1d9-f8db-4078-9ed5-f91b4f9d0055",
+  "name" : "we",
+  "createdAt" : 1639467424852,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "71f13588-5b16-416b-a143-49359b030132",
+  "name" : "we",
+  "createdAt" : 1639467464127,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "bafcec92-6b06-478f-b3b9-56327d576570",
+  "name" : "Alisher",
+  "createdAt" : 1639474511370,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : false
+}, {
+  "id" : "13f065f5-0330-41a9-83c9-734d03b726c7",
+  "name" : "wears",
+  "createdAt" : 1639475126278,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : false
+}, {
+  "id" : "96b4bb0e-da8d-44fe-938c-26f48da7e09f",
+  "name" : "123",
+  "createdAt" : 1639478745459,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "6be0a0e6-e434-4184-8c9a-979f91e75ee1",
+  "name" : "123",
+  "createdAt" : 1639478819941,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "fc24ce6f-89f4-4018-a55e-2d51d1895b59",
+  "name" : "wewewew",
+  "createdAt" : 1639479164137,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "b62f6d86-3244-468f-8719-83259c2fbe65",
+  "name" : "12312",
+  "createdAt" : 1639479169691,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "d0ecb5f3-874d-45f6-b1ea-acc1621fb3df",
+  "name" : "rtert",
+  "createdAt" : 1639479300127,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "b9800d1d-983d-430e-9933-7deb0636510d",
+  "name" : "qqqqqqq",
+  "createdAt" : 1639479786248,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "c5098ebd-b6c4-4c2a-bdad-9409b3f3ef2e",
+  "name" : "trtrtr",
+  "createdAt" : 1639481280129,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "48ebf46c-70de-4a89-ad0b-f948b810ad4e",
+  "name" : "wqqw",
+  "createdAt" : 1639481560567,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "e5fd325d-a8fc-442a-8c72-f360446bac19",
+  "name" : "ewqewqeq",
+  "createdAt" : 1639486353007,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+} ]

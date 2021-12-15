@@ -6,12 +6,14 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import model.product.Category;
 import model.user.Buyer;
 import model.user.Card;
 import model.user.Gender;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+import service.product_service.CategoryService;
 import service.user_service.BuyerService;
 import service.user_service.CardService;
 
@@ -27,17 +29,18 @@ import java.util.UUID;
 public class Main {
 
     public static void main(String[] args) throws IOException, TelegramApiException {
-//        System.out.println("Hello ");
-        BuyerService buyerService = new BuyerService();
-        Buyer buyer = new Buyer();
-        buyer.setName("dsa");
-        buyer.setEmail("husan");
-        buyer.setPhone("123");
-        buyerService.add(buyer);
 
-        Buyer buyer1 = new Buyer();
-        buyer1.setName("hello");
-        buyerService.add(buyer1);
+//        System.out.println("Hello ");
+//        BuyerService buyerService = new BuyerService();
+//        Buyer buyer = new Buyer();
+//        buyer.setName("dsa");
+//        buyer.setEmail("husan");
+//        buyer.setPhone("123");
+//        buyerService.add(buyer);
+//
+//        Buyer buyer1 = new Buyer();
+//        buyer1.setName("hello");
+//        buyerService.add(buyer1);
 
 //          ObjectMapper objectMapper = new ObjectMapper();
 //        String str = objectMapper.writeValueAsString(l1);

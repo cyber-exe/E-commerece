@@ -4,21 +4,29 @@ package bot;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
 import lombok.SneakyThrows;
+import model.Message;
+import model.product.Category;
 import model.user.Buyer;
+import model.user.Gender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
-import org.telegram.telegrambots.meta.api.objects.Contact;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
+import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
+import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
-import org.telegram.telegrambots.meta.exceptions.TelegramApiValidationException;
+import service.product_service.CategoryService;
 import service.user_service.BuyerService;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.*;
 
@@ -28,8 +36,12 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String lang;
     private State state;
     private BuyerService buyerService;
+    private UserService userService;
+    private CategoryService categoryService;
     private Buyer buyer;
-    private boolean checkFromData;
+    private int currentPage;
+    private int prevMenuId;
+    private int messageId;
 
     Stack<ReplyKeyboard> menues = new Stack<>();
     Stack<String> headerOfMenu = new Stack<>();
@@ -38,11 +50,12 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
     {
         buyerService = new BuyerService();
-        buyer = new Buyer();
-        this.state = State.SELLECT_LANG;
-        manageLangList.put("Uzbek", new ContentUz());
-        manageLangList.put("Russian", new ContentRu());
-        manageLangList.put("English", new ContentEng());
+        userService = new UserService();
+        categoryService = new CategoryService();
+        this.state = State.SELECT_LANG;
+        manageLangList.put("UZBEK", new ContentUz());
+        manageLangList.put("RUSSIAN", new ContentRu());
+        manageLangList.put("ENGLISH", new ContentEng());
     }
 
     @Override
@@ -55,128 +68,351 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return BOT_TOKEN;
     }
 
+    public TgBot() {
+        super();
+    }
+
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
-            buyer.setName(update.getMessage().getFrom().getFirstName());
-            buyer.setSecondName(update.getMessage().getFrom().getLastName());
+            int msgId = update.getMessage().getMessageId();
+
+            buyer = userService.getUserByChatId(update.getMessage().getChatId());
+            buyer.setCurrentPage(1);
+            buyerService.edit(buyer);
+
+            if(buyer == null)
+                buyer = buyerService.add(new Buyer(update.getMessage().getChatId(), update.getMessage().getFrom().getFirstName()));
 
             String text = update.getMessage().getText();
-            String contact = update.getMessage().getContact().getPhoneNumber();
-
+            delete(msgId);
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
-                String main_header = manageLangList.getOrDefault(this.lang, new ContentEng()).enter_to_system;
-                this.menues.push(mainMenu());
-                this.headerOfMenu.push(main_header);
-                this.state = State.REGISTER_MENU;
+                this.send(langMenu(), this.message);
+            } else if(text.equals("SELECT_LANG")) {
+                this.state = State.SELECT_LANG;
 
-                this.execute(langMenu(), this.message);
-                this.execute(mainMenu(), main_header);
+                buyer.setState(State.SELECT_LANG);
+                buyer.setCurrentPage(1);
+                buyerService.edit(buyer);
+                if(buyer.getMassageId() == 0)
+                    send(langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
+                else
+                    edit(msgId, langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
 
-            } else if(text.equals("Uzbek") || text.equals("Russian") || text.equals("English")) {
-                this.lang = text;
-                this.execute(manageLangList.getOrDefault(text, new ContentEng()).selected_lang);
+            } else if(text.equals("SETTINGS")) {
+                this.state = State.SETTINGS;
 
-            } else if(this.state == State.ENTER_EMAIL) {
-                execute("sizning emailingiz: " + text);
-                buyer.setEmail(text);
+                buyer.setState(State.SETTINGS);
+                buyerService.edit(buyer);
 
-                this.state = State.ENTER_PHONE;
+                send(settingsMenu(), "SETTINGS");
+            } else if(text.equals("\uD83D\uDD19 PREV")) {
+                if(buyer.getState() == State.SETTINGS) {
+                    this.state = State.MAIN_MENU;
 
-                execute(getContact(), manageLangList.getOrDefault(this.lang, new ContentEng()).enter_phone);
-            } else if(this.state == State.ENTER_PHONE) {
-                execute("sizning tel raqamingiz: " + contact);
-                buyer.setPhone(contact);
+                    buyer.setState(State.MAIN_MENU);
+                    buyerService.edit(buyer);
 
-                if(this.checkFromData) {
-                    if(buyerService.check(buyer)) {
-                        String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
-                        this.state = State.BUYER_MENU;
-                        this.menues.push(buyerMenu());
-                        this.headerOfMenu.push(txt);
-                        execute(buyerMenu(), txt);
-                    } else {
-                        execute(mainMenu(), manageLangList.getOrDefault(this.lang, new ContentEng()).input_error);
-                    }
-                } else {
-                    this.state = State.ENTER_AGE;
-                    execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_age);
+                    send(mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
                 }
-            } else if(this.state == State.ENTER_AGE) {
-                execute("sizning yoshingiz: " + text);
+            } else if(text.equals("PRODUCTS")) {
+                if(buyer.getState() == State.MAIN_MENU) {
+                    this.state = State.CATEGORY_LIST;
+                    buyer.setMassageId(msgId);
+                    buyer.setState(State.CATEGORY_LIST);
+                    buyerService.edit(buyer);
 
+                    send(categoryMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                }
+            } else if(buyer.getState() == State.ENTER_CATEGORY_NAME) {
+                Category category = new Category();
+                category.setName(text);
                 try {
-                    buyer.setAge(Integer.parseInt(text));
-                    buyer.setCreatedAt(LocalDate.now());
-                    buyerService.add(buyer);
-                    String txt = manageLangList.getOrDefault(this.lang, new ContentEng()).main_header;
-                    this.state = State.BUYER_MENU;
-                    this.menues.push(buyerMenu());
-                    this.headerOfMenu.push(txt);
-                    execute(buyerMenu(), txt);
-                } catch (NumberFormatException e) {
-                    execute("Yosh xato, qayta kiriting");
+                    categoryService.add(category);
+                } catch (Exception e) {
                     e.printStackTrace();
                 }
+
+                edit(buyer.getMassageId(), categoryMenu(), "Category menu");
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
             String data = update.getCallbackQuery().getData();
+            int msgId = update.getCallbackQuery().getMessage().getMessageId();
+            String callbackQueryId = update.getCallbackQuery().getId();
 
-            if(State.SIGN_UP.toString().equals(data)) {
-                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
-                this.state = State.ENTER_EMAIL;
-            } else if(State.SIGN_IN.toString().equals(data)) {
-                execute(manageLangList.getOrDefault(this.lang, new ContentEng()).enter_email);
-                this.state = State.ENTER_EMAIL;
-                this.checkFromData = true;
-            } else if(data.equals("ABOUT_ME")) {
-//                List<List<InlineKeyboardButton>> l = new ArrayList<>();
-//                List<InlineKeyboardButton> row = new ArrayList<>();
-//                InlineKeyboardButton btn = new InlineKeyboardButton();
-//                btn.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).prev);
-//                btn.setCallbackData("PREV");
+            if(data.equals("UZBEK") || data.equals("RUSSIAN") || data.equals("ENGLISH")) {
+                buyer.setLan(data);
+                buyer.setState(State.MAIN_MENU);
+                buyer.setMassageId(0);
+                buyerService.edit(buyer);
 
-                execute(buyer.toString());
-            } else if(data.equals("PREV")) {
-                this.menues.pop();
-                this.headerOfMenu.pop();
-                if(this.menues.peek() instanceof InlineKeyboardMarkup) {
-                    this.execute((InlineKeyboardMarkup) this.menues.peek(), this.headerOfMenu.peek());
-                } else {
-                    this.execute((ReplyKeyboardMarkup) this.menues.peek(), this.headerOfMenu.peek());
+                popup(callbackQueryId, data);
+
+                delete(msgId);
+
+               // send(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
+
+                this.state = State.MAIN_MENU;
+
+                send(mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+            }
+//            else if(data.equals("SELECT_LANG")) {
+//                this.state = State.SELECT_LANG;
+//
+//                buyer.setState(State.SELECT_LANG);
+//                buyerService.edit(buyer);
+//                edit(msgId, langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
+//            }
+            else if(data.equals("ENTER_CATEGORY_NAME")) {
+                this.state = State.ENTER_CATEGORY_NAME;
+                buyer.setState(State.ENTER_CATEGORY_NAME);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+
+                send("Enter category name: ");
+            } else if(data.equals("DELETE_CATEGORY")) {
+                this.state = State.DELETE_CATEGORY;
+                buyer.setState(State.DELETE_CATEGORY);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+            } else if(buyer.getState().equals(State.DELETE_CATEGORY)) {
+                this.state = State.CATEGORY_MENU;
+                buyer.setState(State.CATEGORY_MENU);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+
+                if(deleteCategory(data))
+                    popup(callbackQueryId, "The category is deleted!");
+                else
+                    popup(callbackQueryId, "The category is not deleted!");
+                edit(msgId, manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+
+            } else if(data.equals("BACK")) {
+                if(buyer.getState() == State.CATEGORY_LIST) {
+                    this.state = State.MAIN_MENU;
+                    buyer.setMassageId(0);
+                    buyer.setState(State.MAIN_MENU);
+                    buyerService.edit(buyer);
+
+                    delete(update.getCallbackQuery().getMessage().getMessageId());
+                    send(mainMenu(), "Main menu");
                 }
+            } else if(data.equals("PREV")) {
+                if(buyer.getCurrentPage() != 1) {
+                    buyer.setCurrentPage(buyer.getCurrentPage() - 1);
+                    this.messageId = msgId;
+                    buyer.setMassageId(msgId);
+                    buyerService.edit(buyer);
+                    edit(msgId, categoryMenu(), "dasdas");
+                }
+            } else if(data.equals("NEXT")) {
+                buyer.setCurrentPage(buyer.getCurrentPage() + 1);
+                this.messageId = msgId;
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+                edit(msgId, categoryMenu(), "dasdas");
             }
         }
     }
+// TODO universal qilish kerak shu methodni
+    public List<List<InlineKeyboardButton>> getItemList() {
+        int i = 0;
+        boolean getItem = false;
 
-    public ReplyKeyboardMarkup getContact(){
+        List<List<InlineKeyboardButton>> list = new ArrayList<>();
+
+        for (Category category : categoryService.getActives()) {
+            if(this.buyer.getCurrentPage() * 10 - 10 == i)
+                getItem = true;
+
+            if(this.buyer.getCurrentPage() * 10 == i)
+                break;
+
+            if(getItem) {
+                InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+                inlineKeyboardButton.setText(category.getName());
+                inlineKeyboardButton.setCallbackData(category.getId().toString());
+                List<InlineKeyboardButton> row = new ArrayList<>();
+                row.add(inlineKeyboardButton);
+                list.add(row);
+            }
+
+            i++;
+        }
+
+        return list;
+    }
+
+    public InlineKeyboardMarkup categoryMenu() {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> list = getItemList();
+
+        list.add(pageRow());
+        list.add(addCategory());
+        list.add(deleteCategoryBtn());
+        list.add(back());
+
+        inlineKeyboardMarkup.setKeyboard(list);
+
+        return inlineKeyboardMarkup;
+    }
+
+    public List<InlineKeyboardButton> pageRow() {
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(prev());
+        row.add(currentPage());
+        row.add(next());
+
+        return row;
+    }
+
+
+
+    public List<InlineKeyboardButton> back() {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setText("⬅️");
+        inlineKeyboardButton.setCallbackData("BACK");
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(inlineKeyboardButton);
+
+        return row;
+    }
+
+    public InlineKeyboardButton next() {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setText("➡️");
+        inlineKeyboardButton.setCallbackData("NEXT");
+
+        return inlineKeyboardButton;
+    }
+
+    public InlineKeyboardButton prev() {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setText("⬅️");
+        inlineKeyboardButton.setCallbackData("PREV");
+
+        return inlineKeyboardButton;
+    }
+
+    public InlineKeyboardButton currentPage() {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setText(" " + buyer.getCurrentPage() + " ");
+        inlineKeyboardButton.setCallbackData("PREV");
+
+        return inlineKeyboardButton;
+    }
+
+    public List<InlineKeyboardButton> addCategory() {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setText("Add new category");
+        inlineKeyboardButton.setCallbackData("ENTER_CATEGORY_NAME");
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(inlineKeyboardButton);
+
+        return row;
+    }
+
+    public List<InlineKeyboardButton> deleteCategoryBtn() {
+        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+        inlineKeyboardButton.setText("Delete category");
+        inlineKeyboardButton.setCallbackData("DELETE_CATEGORY");
+
+        List<InlineKeyboardButton> row = new ArrayList<>();
+        row.add(inlineKeyboardButton);
+
+        return row;
+    }
+
+    public boolean deleteCategory(String data) {
+        for (Category category : categoryService.getList()) {
+            if(data.equals(category.getId().toString())) {
+                try {
+                    this.categoryService.delete(category);
+                } catch (IOException e) {
+                    send("Category with this name is not defined!");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    public void popup(String callbackQueryId, String data) {
+        AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
+        answerCallbackQuery.setText(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
+        answerCallbackQuery.setShowAlert(true);
+        answerCallbackQuery.setCallbackQueryId(callbackQueryId);
+
+        try {
+            super.execute(answerCallbackQuery);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public ReplyKeyboardMarkup mainMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         replyKeyboardMarkup.setKeyboard(keyboardRows);
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setOneTimeKeyboard(true);
-        replyKeyboardMarkup.setInputFieldPlaceholder("Share contact...");
 
         KeyboardRow keyboardRow = new KeyboardRow();
-        KeyboardButton btn = new KeyboardButton();
-        btn.setText("My contact");
-        btn.setRequestContact(true);
-        keyboardRow.add(btn);
+        keyboardRow.add("PRODUCTS");
 
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        keyboardRow1.add("MOYA KORZINKA");
+        keyboardRow1.add("MOYI ZAKAZI");
+
+        KeyboardRow keyboardRow2 = new KeyboardRow();
+        keyboardRow2.add("SETTINGS");
 
         keyboardRows.add(keyboardRow);
+        keyboardRows.add(keyboardRow1);
+        keyboardRows.add(keyboardRow2);
 
         return replyKeyboardMarkup;
-
-
+//        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+//        List<List<InlineKeyboardButton>> list = new ArrayList<>();
+//
+//        inlineKeyboardMarkup.setKeyboard(list);
+//
+//        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+//
+//        inlineKeyboardButton.setText("produkti");
+//        inlineKeyboardButton.setCallbackData("PRODUCTS");
+//        List<InlineKeyboardButton> row = new ArrayList<>();
+//        row.add(inlineKeyboardButton);
+//
+//        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
+//        inlineKeyboardButton1.setText("Moya korzinka");
+//        inlineKeyboardButton1.setCallbackData("MY_BASKET");
+//        List<InlineKeyboardButton> row1 = new ArrayList<>();
+//        row1.add(inlineKeyboardButton1);
+//
+//        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
+//        inlineKeyboardButton2.setText("Nastroyka");
+//        inlineKeyboardButton2.setCallbackData("SETTINGS");
+//        List<InlineKeyboardButton> row2 = new ArrayList<>();
+//        row2.add(inlineKeyboardButton2);
+//
+//        list.add(row);
+//        list.add(row1);
+//        list.add(row2);
+//
+//        return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup buyerMenu() {
+    public InlineKeyboardMarkup langMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> list = new ArrayList<>();
 
@@ -184,81 +420,68 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-        inlineKeyboardButton.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).products);
-        inlineKeyboardButton.setCallbackData("PRODUCT_LIST");
+        inlineKeyboardButton.setText("UZBEK");
+        inlineKeyboardButton.setCallbackData("UZBEK");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).my_basket);
-        inlineKeyboardButton1.setCallbackData("MY_BASKET");
+        inlineKeyboardButton1.setText("RUSSIAN");
+        inlineKeyboardButton1.setCallbackData("RUSSIAN");
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
         InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
-        inlineKeyboardButton2.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).about_me);
-        inlineKeyboardButton2.setCallbackData("ABOUT_ME");
+        inlineKeyboardButton2.setText("ENGLISH");
+        inlineKeyboardButton2.setCallbackData("ENGLISH");
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         row2.add(inlineKeyboardButton2);
-
-        InlineKeyboardButton inlineKeyboardButton3 = new InlineKeyboardButton();
-        inlineKeyboardButton3.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).prev);
-        inlineKeyboardButton3.setCallbackData("PREV");
-        List<InlineKeyboardButton> row3 = new ArrayList<>();
-        row3.add(inlineKeyboardButton3);
 
         list.add(row);
         list.add(row1);
         list.add(row2);
-        list.add(row3);
 
         return inlineKeyboardMarkup;
     }
 
-    public InlineKeyboardMarkup mainMenu() {
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> list = new ArrayList<>();
-
-        inlineKeyboardMarkup.setKeyboard(list);
-
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-
-        inlineKeyboardButton.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_in);
-        inlineKeyboardButton.setCallbackData("SIGN_IN");
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(inlineKeyboardButton);
-
-        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText(manageLangList.getOrDefault(this.lang, new ContentEng()).sign_up);
-        inlineKeyboardButton1.setCallbackData("SIGN_UP");
-
-
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        row1.add(inlineKeyboardButton1);
-
-        list.add(row);
-        list.add(row1);
-
-        return inlineKeyboardMarkup;
-    }
-
-    public ReplyKeyboardMarkup langMenu() {
+    public ReplyKeyboardMarkup settingsMenu() {
         ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
         List<KeyboardRow> keyboardRows = new ArrayList<>();
         replyKeyboardMarkup.setKeyboard(keyboardRows);
         replyKeyboardMarkup.setResizeKeyboard(true);
         replyKeyboardMarkup.setSelective(true);
         replyKeyboardMarkup.setOneTimeKeyboard(true);
-        replyKeyboardMarkup.setInputFieldPlaceholder("Language...");
 
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("Uzbek");
+        keyboardRow.add("MY_PROFILE");
+        keyboardRow.add("SELECT_LANG");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("Russian");
+        keyboardRow1.add("\uD83D\uDD19 PREV");
+
+        keyboardRows.add(keyboardRow);
+        keyboardRows.add(keyboardRow1);
+
+        return replyKeyboardMarkup;
+    }
+
+    public ReplyKeyboardMarkup genderMenu() {
+        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
+        List<KeyboardRow> keyboardRows = new ArrayList<>();
+        replyKeyboardMarkup.setKeyboard(keyboardRows);
+        replyKeyboardMarkup.setResizeKeyboard(true);
+        replyKeyboardMarkup.setSelective(true);
+        replyKeyboardMarkup.setOneTimeKeyboard(true);
+        replyKeyboardMarkup.setInputFieldPlaceholder("The gender is...");
+
+        KeyboardRow keyboardRow = new KeyboardRow();
+        keyboardRow.add("MALE");
+
+        KeyboardRow keyboardRow1 = new KeyboardRow();
+        keyboardRow1.add("FEMALE");
 
         KeyboardRow keyboardRow2 = new KeyboardRow();
-        keyboardRow2.add("English");
+        keyboardRow2.add("OTHERS");
 
         keyboardRows.add(keyboardRow);
         keyboardRows.add(keyboardRow1);
@@ -267,7 +490,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return replyKeyboardMarkup;
     }
 
-    private void execute(ReplyKeyboardMarkup menu, String text) {
+    private void send(ReplyKeyboardMarkup menu, String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(text);
         sendMessage.setChatId(this.chatId);
@@ -280,8 +503,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void execute(InlineKeyboardMarkup menu, String text) {
+    private void send(InlineKeyboardMarkup menu, String text) {
         SendMessage sendMessage = new SendMessage();
+        Integer replyToMessageId = sendMessage.getReplyToMessageId();
         sendMessage.setText(text);
         sendMessage.setChatId(this.chatId);
         sendMessage.setReplyMarkup(menu);
@@ -293,7 +517,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void execute(String text) {
+    private void send(String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setChatId(this.chatId);
         sendMessage.setText(text);
@@ -305,4 +529,48 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
+    private void edit(int editedId, InlineKeyboardMarkup menu, String text) {
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(this.chatId);
+        editMessageText.setText(text);
+        editMessageText.setMessageId(editedId);
+        editMessageText.setReplyMarkup(menu);
+
+        try {
+            super.execute(editMessageText);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void edit(int editedId, String text) {
+        EditMessageText editMessageText = new EditMessageText();
+        editMessageText.setChatId(this.chatId);
+        editMessageText.setText(text);
+        editMessageText.setMessageId(editedId);
+
+
+        try {
+            super.execute(editMessageText);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void delete(int deletedId) {
+        DeleteMessage deleteMessage = new DeleteMessage();
+        deleteMessage.setChatId(this.chatId);
+        deleteMessage.setMessageId(deletedId);
+        ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove(true);
+        try {
+            super.execute(deleteMessage);
+        } catch (TelegramApiException e) {
+            e.printStackTrace();
+        }
+    }
+
+//    private void deleteReplyMenu(int deletedId) {
+//        ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
+//
+//    }
 }
