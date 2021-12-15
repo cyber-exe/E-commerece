@@ -1,10 +1,7 @@
 package bot;
 
 
-import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
-import lombok.Data;
 import lombok.SneakyThrows;
-import model.Message;
 import model.product.Category;
 import model.user.Buyer;
 import model.user.Gender;
@@ -12,7 +9,6 @@ import org.telegram.telegrambots.bots.TelegramLongPollingBot;
 import org.telegram.telegrambots.meta.api.methods.AnswerCallbackQuery;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage;
-import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageReplyMarkup;
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
@@ -20,15 +16,16 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardButton;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import service.product_service.CategoryService;
 import service.user_service.BuyerService;
 
 import java.io.IOException;
-import java.time.LocalDate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Stack;
 
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String chatId;
@@ -221,6 +218,8 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             }
         }
     }
+
+
 // TODO universal qilish kerak shu methodni
     public List<List<InlineKeyboardButton>> getItemList() {
         int i = 0;
@@ -425,19 +424,19 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
 
-        inlineKeyboardButton.setText("UZBEK");
+        inlineKeyboardButton.setText("\uD83C\uDDFA\uD83C\uDDFF UZBEK \uD83C\uDDFA\uD83C\uDDFF");
         inlineKeyboardButton.setCallbackData("UZBEK");
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
 
         InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText("RUSSIAN");
+        inlineKeyboardButton1.setText("\uD83C\uDDF7\uD83C\uDDFA RUSSIAN \uD83C\uDDF7\uD83C\uDDFA");
         inlineKeyboardButton1.setCallbackData("RUSSIAN");
         List<InlineKeyboardButton> row1 = new ArrayList<>();
         row1.add(inlineKeyboardButton1);
 
         InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
-        inlineKeyboardButton2.setText("ENGLISH");
+        inlineKeyboardButton2.setText("\uD83C\uDDFA\uD83C\uDDF8 ENGLISH \uD83C\uDDFA\uD83C\uDDF8");
         inlineKeyboardButton2.setCallbackData("ENGLISH");
         List<InlineKeyboardButton> row2 = new ArrayList<>();
         row2.add(inlineKeyboardButton2);
@@ -458,8 +457,8 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         replyKeyboardMarkup.setOneTimeKeyboard(true);
 
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("MY_PROFILE");
-        keyboardRow.add("SELECT_LANG");
+        keyboardRow.add("\uD83D\uDC64 MY_PROFILE uD83D\uDC64");
+        keyboardRow.add("✅ SELECT_LANG ✅");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
         keyboardRow1.add("\uD83D\uDD19 PREV");
@@ -480,13 +479,13 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         replyKeyboardMarkup.setInputFieldPlaceholder("The gender is...");
 
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("MALE");
+        keyboardRow.add("\uD83D\uDD7A MALE \uD83D\uDD7A");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("FEMALE");
+        keyboardRow1.add("\uD83D\uDC83 FEMALE \uD83D\uDC83");
 
         KeyboardRow keyboardRow2 = new KeyboardRow();
-        keyboardRow2.add("OTHERS");
+        keyboardRow2.add("\uD83E\uDD37\u200D♂️ OTHERS \uD83E\uDD37\u200D♂️");
 
         keyboardRows.add(keyboardRow);
         keyboardRows.add(keyboardRow1);

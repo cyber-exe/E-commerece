@@ -2,6 +2,7 @@ package service.user_service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import model.product.Category;
 import model.user.Buyer;
 import org.apache.poi.util.StringUtil;
 import service.BaseService;
@@ -64,7 +65,15 @@ public class BuyerService implements BaseService<Buyer, String> {
 
     @Override
     public List<Buyer> getActives() {
-        return null;
+
+        List<Buyer> list = new ArrayList<>();
+
+        for (Buyer buyer : buyers) {
+            if(buyer.isActive())
+                list.add(buyer);
+        }
+
+        return list;
     }
 
 
