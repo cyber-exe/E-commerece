@@ -60,6 +60,11 @@ public class CardService implements BaseService<Card, String> {
     }
 
     @Override
+    public List<Card> getActives() {
+        return null;
+    }
+
+    @Override
     public boolean check(Card card) {
         if(this.cards == null) {
             return false;

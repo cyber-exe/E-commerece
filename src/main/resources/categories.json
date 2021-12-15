@@ -53,7 +53,7 @@
   "updatedAt" : null,
   "createdBy" : null,
   "updatedBy" : null,
-  "active" : true
+  "active" : false
 }, {
   "id" : "13f065f5-0330-41a9-83c9-734d03b726c7",
   "name" : "wears",
@@ -61,7 +61,7 @@
   "updatedAt" : null,
   "createdBy" : null,
   "updatedBy" : null,
-  "active" : true
+  "active" : false
 }, {
   "id" : "96b4bb0e-da8d-44fe-938c-26f48da7e09f",
   "name" : "123",

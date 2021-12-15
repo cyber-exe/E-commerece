@@ -17,6 +17,7 @@ public interface BaseService<I,T> {
     I edit(I i) throws IOException;
     I get(UUID id);
     List<I> getList();
+    List<I> getActives();
     boolean check(I i);
     List<I> listFromJson(String path) throws Exception;
     default void updateJson(List<I> list, String path) throws IOException {

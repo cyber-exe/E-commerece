@@ -57,6 +57,11 @@ public class AdminService implements BaseService<Admin, String>{
     }
 
     @Override
+    public List<Admin> getActives() {
+        return null;
+    }
+
+    @Override
     public boolean check(Admin admin) {
         for(Admin el : this.admins){
             if(el.getPhone().equals(admin.getPhone()) || el.getEmail().equals(admin.getEmail()))

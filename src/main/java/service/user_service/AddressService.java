@@ -34,6 +34,11 @@ public class AddressService implements BaseService<Address,String> {
     }
 
     @Override
+    public List<Address> getActives() {
+        return null;
+    }
+
+    @Override
     public boolean check(Address address) {
         return false;
     }

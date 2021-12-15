@@ -65,6 +65,11 @@ public class SellerService implements BaseService<Seller, String> {
     }
 
     @Override
+    public List<Seller> getActives() {
+        return null;
+    }
+
+    @Override
     public boolean check(Seller seller) {
         for(Seller s: sellerList){
             if(s.getPhoneNumber().equals(seller.getPhoneNumber()) || s.getEmail().equals(seller.getEmail()))

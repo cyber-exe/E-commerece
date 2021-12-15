@@ -61,6 +61,11 @@ public class BasketService implements BaseService<Basket, String> {
     }
 
     @Override
+    public List<Basket> getActives() {
+        return null;
+    }
+
+    @Override
     public boolean check(Basket basket) {
         for(Basket b : this.baskets){
             if(b.getOwnerId().equals(basket.getOwnerId()) && b.getProductId().equals(basket.
