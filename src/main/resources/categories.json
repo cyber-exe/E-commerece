@@ -53,7 +53,7 @@
   "updatedAt" : null,
   "createdBy" : null,
   "updatedBy" : null,
-  "active" : true
+  "active" : false
 }, {
   "id" : "6be0a0e6-e434-4184-8c9a-979f91e75ee1",
   "name" : "123",
@@ -85,7 +85,7 @@
   "updatedAt" : null,
   "createdBy" : null,
   "updatedBy" : null,
-  "active" : true
+  "active" : false
 }, {
   "id" : "b9800d1d-983d-430e-9933-7deb0636510d",
   "name" : "qqqqqqq",
@@ -246,4 +246,172 @@
   "createdBy" : null,
   "updatedBy" : null,
   "active" : false
+}, {
+  "id" : "5dae534d-936c-43ef-ab97-8cc832a549b5",
+  "name" : "dwdwdwdwdwdw",
+  "createdAt" : 1639573092213,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : false
+}, {
+  "id" : "dab190b9-8d1e-4a2a-b01d-4493a0876941",
+  "name" : "alisher",
+  "createdAt" : 1639573219094,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : false
+}, {
+  "id" : "315728b8-9b98-473b-907f-3a37387ea482",
+  "name" : "Gggg",
+  "createdAt" : 1639573318560,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : false
+}, {
+  "id" : "621ef3ba-c970-402d-b494-d4e0c940612f",
+  "name" : "Axroraka",
+  "createdAt" : 1639573405129,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "2463b00f-a570-4536-843b-7bb43dbca2f0",
+  "name" : "Hshhs",
+  "createdAt" : 1639573409959,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "26b93929-4007-4f20-b5d7-4407a902c692",
+  "name" : "Hxhxhx",
+  "createdAt" : 1639573412616,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "671646e4-faf2-488f-b560-251d853098b8",
+  "name" : "Shhs",
+  "createdAt" : 1639573413898,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "cbb4e186-d945-4bd5-981f-c9f405cce613",
+  "name" : "Xhx",
+  "createdAt" : 1639573414700,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "85861937-006e-45b9-9b7a-ada6dde3f27a",
+  "name" : "Bsbs",
+  "createdAt" : 1639573415751,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "b1cffff2-e200-4d84-ae67-5ee87707ea78",
+  "name" : "Shsh",
+  "createdAt" : 1639573416957,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "5341288b-6a64-4f5d-b5d3-5efc356c7f9b",
+  "name" : "Hsbs",
+  "createdAt" : 1639573418088,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "37d8e6b8-7362-48b9-bd45-fccaee11d8f8",
+  "name" : "Shdh",
+  "createdAt" : 1639573419304,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "18d5d04c-8905-42d1-b37f-52381222825d",
+  "name" : "Bbs",
+  "createdAt" : 1639573420671,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "6e903a75-7552-4ded-b107-5e6c93c14865",
+  "name" : "Shshd",
+  "createdAt" : 1639573422633,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "a2c0a65c-2f0c-4b78-ad22-dd7b7fe59bff",
+  "name" : "Hshsh",
+  "createdAt" : 1639573424774,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "7696e17c-21ca-46c9-a23e-44fa775fe427",
+  "name" : "Hhshd",
+  "createdAt" : 1639573435310,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "49e55492-59f4-4c5c-a7ed-62f17f268466",
+  "name" : "Hdudh",
+  "createdAt" : 1639573437925,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "e8dc9ce1-48c0-4fc5-86bc-f9ce859676e2",
+  "name" : "Aldamaylar",
+  "createdAt" : 1639573451923,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "6cba1143-bfec-4e68-a21e-cfadacca9448",
+  "name" : "Liboy",
+  "createdAt" : 1639573461679,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "d68856d0-bf45-49d9-8f9b-50199373379b",
+  "name" : "MOYI ZAKAZI",
+  "createdAt" : 1639573501188,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "e5290242-047d-4c89-a3c6-d50b3866ff21",
+  "name" : "MOYA KORZINKA",
+  "createdAt" : 1639573505536,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
 } ]

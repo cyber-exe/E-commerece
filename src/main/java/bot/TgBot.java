@@ -89,7 +89,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
                 this.send(langMenu(), this.message);
-            } else if(text.equals("SELECT_LANG")) {
+            } else if(text.equals("✅ SELECT_LANG ✅")) {
                 this.state = State.SELECT_LANG;
 
                 buyer.setState(State.SELECT_LANG);
@@ -457,7 +457,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         replyKeyboardMarkup.setOneTimeKeyboard(true);
 
         KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("\uD83D\uDC64 MY_PROFILE uD83D\uDC64");
+        keyboardRow.add("\uD83D\uDC64 MY_PROFILE \uD83D\uDC64");
         keyboardRow.add("✅ SELECT_LANG ✅");
 
         KeyboardRow keyboardRow1 = new KeyboardRow();
