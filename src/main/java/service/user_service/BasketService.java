@@ -2,6 +2,7 @@ package service.user_service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import model.product.Category;
 import model.user.Basket;
 import service.BaseService;
 import service.paths.Root;
@@ -62,7 +63,15 @@ public class BasketService implements BaseService<Basket, String> {
 
     @Override
     public List<Basket> getActives() {
-        return null;
+
+        List<Basket> list = new ArrayList<>();
+
+        for (Basket basket : baskets) {
+            if(basket.isActive())
+                list.add(basket);
+        }
+
+        return list;
     }
 
     @Override

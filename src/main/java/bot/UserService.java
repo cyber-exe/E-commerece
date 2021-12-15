@@ -15,7 +15,6 @@ public class UserService {
             if(buyer.getChatId() == chatId)
                 return buyer;
         }
-
         return null;
     }
 }

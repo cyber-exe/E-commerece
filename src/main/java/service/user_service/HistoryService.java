@@ -2,6 +2,7 @@ package service.user_service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import model.product.Category;
 import model.user.History;
 import service.BaseService;
 import service.paths.Root;
@@ -60,7 +61,15 @@ public class HistoryService implements BaseService<History, String> {
 
     @Override
     public List<History> getActives() {
-        return null;
+        List<History> list = new ArrayList<>();
+
+        for (History history : histories) {
+            if(history.isActive())
+                list.add(history);
+        }
+
+        return list;
+
     }
 
     @Override

@@ -24,6 +24,7 @@ public abstract class BaseModel {
     private UUID updatedBy;
 
     {
+
         this.id = UUID.randomUUID();
         this.isActive = true;
         this.createdAt = new Date();

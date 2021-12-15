@@ -48,7 +48,7 @@ public class CategoryService implements BaseService<Category, String> {
     public Category get(UUID id) {
         for (Category s :
                 categoryList) {
-            if(s.getId().equals(id)) return s;
+            if(s.getId().equals(id) && s.isActive()) return s;
         }
         return null;
     }
@@ -63,7 +63,7 @@ public class CategoryService implements BaseService<Category, String> {
         List<Category> list = new ArrayList<>();
 
         for (Category category : categoryList) {
-            if(!category.isActive())
+            if(category.isActive())
                 list.add(category);
         }
 

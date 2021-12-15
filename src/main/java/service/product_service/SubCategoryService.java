@@ -61,7 +61,14 @@ public class SubCategoryService implements BaseService<SubCategory, String> {
 
     @Override
     public List<SubCategory> getActives() {
-        return null;
+        List<SubCategory> list = new ArrayList<>();
+
+        for (SubCategory sub : subCategoryList) {
+            if(sub.isActive())
+                list.add(sub);
+        }
+
+        return list;
     }
 
     @Override
