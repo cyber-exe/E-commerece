@@ -20,7 +20,8 @@ public class Buyer extends BaseModel {
     private String email;
     private String password;
     private long chatId;
-    private long massageId;
+    private int massageId;
+    private int currentPage;
     private String lan;
     private State state;
 
@@ -28,6 +29,7 @@ public class Buyer extends BaseModel {
         super.setName(name);
         this.chatId = chatId;
         this.state = State.START;
+        this.currentPage = 1;
     }
 
     @Override
