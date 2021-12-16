@@ -1,6 +1,6 @@
-package bot;
+package bot.language_service;
 
-abstract class ManageLang {
+public abstract class ManageLang {
     public String selected_lang;
     public String enter_to_system;
     public String sign_up;

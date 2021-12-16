@@ -85,7 +85,7 @@
   "updatedAt" : null,
   "createdBy" : null,
   "updatedBy" : null,
-  "active" : true
+  "active" : false
 }, {
   "id" : "b62f6d86-3244-468f-8719-83259c2fbe65",
   "name" : "12312",
@@ -130,6 +130,22 @@
   "id" : "e5fd325d-a8fc-442a-8c72-f360446bac19",
   "name" : "ewqewqeq",
   "createdAt" : 1639486353007,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : true
+}, {
+  "id" : "0f5eaf01-1c45-453b-9a2b-2d405de64c37",
+  "name" : "Electronics",
+  "createdAt" : 1639572165543,
+  "updatedAt" : null,
+  "createdBy" : null,
+  "updatedBy" : null,
+  "active" : false
+}, {
+  "id" : "26064d5b-aa5c-4362-b0ee-dcc937c57c49",
+  "name" : "1233123123123",
+  "createdAt" : 1639642068295,
   "updatedAt" : null,
   "createdBy" : null,
   "updatedBy" : null,

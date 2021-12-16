@@ -63,7 +63,7 @@ public class BuyerService implements BaseService<Buyer, String> {
         return this.buyers;
     }
 
-    @Override
+
     public List<Buyer> getActives() {
 
         List<Buyer> list = new ArrayList<>();

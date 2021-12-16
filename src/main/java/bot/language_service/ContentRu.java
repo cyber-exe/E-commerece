@@ -1,10 +1,11 @@
-package bot;
+package bot.language_service;
 
 import lombok.Data;
 
 @Data
+public
 class ContentRu extends ManageLang{
-    ContentRu(){
+    public ContentRu(){
         selected_lang = "Выбран русский язык! ";
         enter_to_system = "Вход в систему";
         sign_in = "Войти";

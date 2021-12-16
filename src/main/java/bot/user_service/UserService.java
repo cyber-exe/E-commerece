@@ -1,4 +1,4 @@
-package bot;
+package bot.user_service;
 
 import model.user.Buyer;
 import service.user_service.BuyerService;

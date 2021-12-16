@@ -1,11 +1,12 @@
-package bot;
+package bot.language_service;
 
 import lombok.Data;
 
 
 @Data
+public
 class ContentUz extends ManageLang {
-    ContentUz(){
+    public ContentUz(){
         selected_lang = "O'zbek tili tanlandi!";
         enter_to_system = "Tizimga kirish";
         sign_in = "Kirish";

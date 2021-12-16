@@ -1,10 +1,11 @@
-package bot;
+package bot.language_service;
 
 import lombok.Data;
 
 @Data
+public
 class ContentEng extends ManageLang{
-    ContentEng(){
+    public ContentEng(){
         selected_lang = "Chosen English language!";
         enter_to_system = "Login to the system";
         sign_in = "Sign in";

@@ -1,6 +1,16 @@
 package bot;
 
 
+import bot.front.Executables;
+import bot.front.InlineKeyboards;
+import bot.front.ReplyKeyboards;
+import bot.language_service.ContentEng;
+import bot.language_service.ContentRu;
+import bot.language_service.ContentUz;
+import bot.language_service.ManageLang;
+import bot.user_service.UserService;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.SneakyThrows;
 import model.product.Category;
 import model.user.Buyer;
@@ -11,20 +21,19 @@ import org.telegram.telegrambots.meta.api.methods.updatingmessages.DeleteMessage
 import org.telegram.telegrambots.meta.api.methods.updatingmessages.EditMessageText;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.InlineKeyboardMarkup;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboard;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardMarkup;
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.ReplyKeyboardRemove;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKeyboardButton;
-import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
+
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import service.product_service.CategoryService;
 import service.user_service.BuyerService;
 
 import java.io.IOException;
-import java.util.ArrayList;
+
 import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+
+@Data
+@AllArgsConstructor
 
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String chatId;
@@ -34,13 +43,14 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private BuyerService buyerService;
     private UserService userService;
     private CategoryService categoryService;
+//    private Executables executables;
+    private InlineKeyboards inlineKeyboards;
+//    private ReplyKeyboards replyKeyboards;
     private Buyer buyer;
     private int currentPage;
     private int prevMenuId;
     private int messageId;
 
-    Stack<ReplyKeyboard> menues = new Stack<>();
-    Stack<String> headerOfMenu = new Stack<>();
 
     HashMap<String, ManageLang> manageLangList = new HashMap<String, ManageLang>();
 
@@ -48,6 +58,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         buyerService = new BuyerService();
         userService = new UserService();
         categoryService = new CategoryService();
+//        executables = new Executables();
+//        inlineKeyboards = new InlineKeyboards();
+//        replyKeyboards = new ReplyKeyboards();
+
         this.state = State.SELECT_LANG;
         manageLangList.put("UZBEK", new ContentUz());
         manageLangList.put("RUSSIAN", new ContentRu());
@@ -68,12 +82,16 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         super();
     }
 
+
+
     @SneakyThrows
     @Override
     public void onUpdateReceived(Update update) {
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
             int msgId = update.getMessage().getMessageId();
+            inlineKeyboards = new InlineKeyboards();
+
 
             buyer = userService.getUserByChatId(update.getMessage().getChatId());
             buyer.setCurrentPage(1);
@@ -86,7 +104,8 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             delete(msgId);
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
-                this.send(langMenu(), this.message);
+                send(new InlineKeyboards().langMenu(), this.message);
+
             } else if(text.equals("SELECT_LANG")) {
                 this.state = State.SELECT_LANG;
 
@@ -94,9 +113,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setCurrentPage(1);
                 buyerService.edit(buyer);
                 if(buyer.getMassageId() == 0)
-                    send(langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
+                    send(new InlineKeyboards().langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
                 else
-                    edit(msgId, langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
+                    edit(msgId, new InlineKeyboards().langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
 
             } else if(text.equals("SETTINGS")) {
                 this.state = State.SETTINGS;
@@ -104,7 +123,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setState(State.SETTINGS);
                 buyerService.edit(buyer);
 
-                send(settingsMenu(), "SETTINGS");
+                send(new ReplyKeyboards().settingsMenu(), "SETTINGS");
             } else if(text.equals("\uD83D\uDD19 PREV")) {
                 if(buyer.getState() == State.SETTINGS) {
                     this.state = State.MAIN_MENU;
@@ -112,7 +131,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     buyer.setState(State.MAIN_MENU);
                     buyerService.edit(buyer);
 
-                    send(mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                    send(new ReplyKeyboards().mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
                 }
             } else if(text.equals("PRODUCTS")) {
                 if(buyer.getState() == State.MAIN_MENU) {
@@ -121,7 +140,8 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     buyer.setState(State.CATEGORY_LIST);
                     buyerService.edit(buyer);
 
-                    send(categoryMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+
+                    send(inlineKeyboards.categoryMenu(buyer, categoryService),manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
                 }
             } else if(buyer.getState() == State.ENTER_CATEGORY_NAME) {
                 Category category = new Category();
@@ -132,7 +152,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     e.printStackTrace();
                 }
 
-                edit(buyer.getMassageId(), categoryMenu(), "Category menu");
+                edit(buyer.getMassageId(), new InlineKeyboards().categoryMenu(buyer, categoryService), "Category menu");
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
@@ -145,7 +165,6 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setState(State.MAIN_MENU);
                 buyer.setMassageId(0);
                 buyerService.edit(buyer);
-
                 popup(callbackQueryId, data);
 
                 delete(msgId);
@@ -154,15 +173,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 this.state = State.MAIN_MENU;
 
-                send(mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                send(new ReplyKeyboards().mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
             }
-//            else if(data.equals("SELECT_LANG")) {
-//                this.state = State.SELECT_LANG;
-//
-//                buyer.setState(State.SELECT_LANG);
-//                buyerService.edit(buyer);
-//                edit(msgId, langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
-//            }
+
             else if(data.equals("ENTER_CATEGORY_NAME")) {
                 this.state = State.ENTER_CATEGORY_NAME;
                 buyer.setState(State.ENTER_CATEGORY_NAME);
@@ -181,7 +194,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
 
-                if(deleteCategory(data))
+                if(new Executables().deleteCategory(data))
                     popup(callbackQueryId, "The category is deleted!");
                 else
                     popup(callbackQueryId, "The category is not deleted!");
@@ -195,7 +208,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     buyerService.edit(buyer);
 
                     delete(update.getCallbackQuery().getMessage().getMessageId());
-                    send(mainMenu(), "Main menu");
+                    send(new ReplyKeyboards().mainMenu(), "Main menu");
                 }
             } else if(data.equals("PREV")) {
                 if(buyer.getCurrentPage() != 1) {
@@ -203,135 +216,24 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     this.messageId = msgId;
                     buyer.setMassageId(msgId);
                     buyerService.edit(buyer);
-                    edit(msgId, categoryMenu(), "dasdas");
+                    edit(msgId, new InlineKeyboards().categoryMenu(buyer, categoryService), "dasdas");
                 }
             } else if(data.equals("NEXT")) {
                 buyer.setCurrentPage(buyer.getCurrentPage() + 1);
                 this.messageId = msgId;
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
-                edit(msgId, categoryMenu(), "dasdas");
+                edit(msgId, new InlineKeyboards().categoryMenu(buyer, categoryService), "dasdas");
             }
         }
     }
 
-
-// TODO universal qilish kerak shu methodni
-    public List<List<InlineKeyboardButton>> getItemList() {
-        int i = 0;
-        boolean getItem = false;
-
-        List<List<InlineKeyboardButton>> list = new ArrayList<>();
-
-        for (Category category : categoryService.getActives()) {
-            if(this.buyer.getCurrentPage() * 10 - 10 == i)
-                getItem = true;
-
-            if(this.buyer.getCurrentPage() * 10 == i)
-                break;
-
-            if(getItem) {
-                InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-                inlineKeyboardButton.setText(category.getName());
-                inlineKeyboardButton.setCallbackData(category.getId().toString());
-                List<InlineKeyboardButton> row = new ArrayList<>();
-                row.add(inlineKeyboardButton);
-                list.add(row);
-            }
-
-            i++;
-        }
-
-        return list;
-    }
-
-    public InlineKeyboardMarkup categoryMenu() {
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> list = getItemList();
-
-        list.add(pageRow());
-        list.add(addCategory());
-        list.add(deleteCategoryBtn());
-        list.add(back());
-
-        inlineKeyboardMarkup.setKeyboard(list);
-
-        return inlineKeyboardMarkup;
-    }
-
-    public List<InlineKeyboardButton> pageRow() {
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(prev());
-        row.add(currentPage());
-        row.add(next());
-
-        return row;
-    }
-
-
-
-    public List<InlineKeyboardButton> back() {
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("⬅️");
-        inlineKeyboardButton.setCallbackData("BACK");
-
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(inlineKeyboardButton);
-
-        return row;
-    }
-
-    public InlineKeyboardButton next() {
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("➡️");
-        inlineKeyboardButton.setCallbackData("NEXT");
-
-        return inlineKeyboardButton;
-    }
-
-    public InlineKeyboardButton prev() {
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("⬅️");
-        inlineKeyboardButton.setCallbackData("PREV");
-
-        return inlineKeyboardButton;
-    }
-
-    public InlineKeyboardButton currentPage() {
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText(" " + buyer.getCurrentPage() + " ");
-        inlineKeyboardButton.setCallbackData("PREV");
-
-        return inlineKeyboardButton;
-    }
-
-    public List<InlineKeyboardButton> addCategory() {
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("Add new category");
-        inlineKeyboardButton.setCallbackData("ENTER_CATEGORY_NAME");
-
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(inlineKeyboardButton);
-
-        return row;
-    }
-
-    public List<InlineKeyboardButton> deleteCategoryBtn() {
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("Delete category");
-        inlineKeyboardButton.setCallbackData("DELETE_CATEGORY");
-
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(inlineKeyboardButton);
-
-        return row;
-    }
 
     public boolean deleteCategory(String data) {
-        for (Category category : categoryService.getList()) {
+        for (Category category : getCategoryService().getList()) {
             if(data.equals(category.getId().toString())) {
                 try {
-                    this.categoryService.delete(category);
+                    getCategoryService().delete(category);
                 } catch (IOException e) {
                     send("Category with this name is not defined!");
                     e.printStackTrace();
@@ -339,13 +241,13 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 break;
             }
         }
-
         return false;
     }
 
+
     public void popup(String callbackQueryId, String data) {
         AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();
-        answerCallbackQuery.setText(manageLangList.getOrDefault(data, new ContentEng()).selected_lang);
+        answerCallbackQuery.setText(getManageLangList().getOrDefault(data, new ContentEng()).selected_lang);
         answerCallbackQuery.setShowAlert(true);
         answerCallbackQuery.setCallbackQueryId(callbackQueryId);
 
@@ -356,142 +258,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    public ReplyKeyboardMarkup mainMenu() {
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(true);
-
-        KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("PRODUCTS");
-
-        KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("MOYA KORZINKA");
-        keyboardRow1.add("MOYI ZAKAZI");
-
-        KeyboardRow keyboardRow2 = new KeyboardRow();
-        keyboardRow2.add("SETTINGS");
-
-        keyboardRows.add(keyboardRow);
-        keyboardRows.add(keyboardRow1);
-        keyboardRows.add(keyboardRow2);
-
-        return replyKeyboardMarkup;
-//        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-//        List<List<InlineKeyboardButton>> list = new ArrayList<>();
-//
-//        inlineKeyboardMarkup.setKeyboard(list);
-//
-//        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-//
-//        inlineKeyboardButton.setText("produkti");
-//        inlineKeyboardButton.setCallbackData("PRODUCTS");
-//        List<InlineKeyboardButton> row = new ArrayList<>();
-//        row.add(inlineKeyboardButton);
-//
-//        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-//        inlineKeyboardButton1.setText("Moya korzinka");
-//        inlineKeyboardButton1.setCallbackData("MY_BASKET");
-//        List<InlineKeyboardButton> row1 = new ArrayList<>();
-//        row1.add(inlineKeyboardButton1);
-//
-//        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
-//        inlineKeyboardButton2.setText("Nastroyka");
-//        inlineKeyboardButton2.setCallbackData("SETTINGS");
-//        List<InlineKeyboardButton> row2 = new ArrayList<>();
-//        row2.add(inlineKeyboardButton2);
-//
-//        list.add(row);
-//        list.add(row1);
-//        list.add(row2);
-//
-//        return inlineKeyboardMarkup;
-    }
-
-    public InlineKeyboardMarkup langMenu() {
-        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
-        List<List<InlineKeyboardButton>> list = new ArrayList<>();
-
-        inlineKeyboardMarkup.setKeyboard(list);
-
-        InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-
-        inlineKeyboardButton.setText("\uD83C\uDDFA\uD83C\uDDFF UZBEK \uD83C\uDDFA\uD83C\uDDFF");
-        inlineKeyboardButton.setCallbackData("UZBEK");
-        List<InlineKeyboardButton> row = new ArrayList<>();
-        row.add(inlineKeyboardButton);
-
-        InlineKeyboardButton inlineKeyboardButton1 = new InlineKeyboardButton();
-        inlineKeyboardButton1.setText("\uD83C\uDDF7\uD83C\uDDFA RUSSIAN \uD83C\uDDF7\uD83C\uDDFA");
-        inlineKeyboardButton1.setCallbackData("RUSSIAN");
-        List<InlineKeyboardButton> row1 = new ArrayList<>();
-        row1.add(inlineKeyboardButton1);
-
-        InlineKeyboardButton inlineKeyboardButton2 = new InlineKeyboardButton();
-        inlineKeyboardButton2.setText("\uD83C\uDDFA\uD83C\uDDF8 ENGLISH \uD83C\uDDFA\uD83C\uDDF8");
-        inlineKeyboardButton2.setCallbackData("ENGLISH");
-        List<InlineKeyboardButton> row2 = new ArrayList<>();
-        row2.add(inlineKeyboardButton2);
-
-        list.add(row);
-        list.add(row1);
-        list.add(row2);
-
-        return inlineKeyboardMarkup;
-    }
-
-    public ReplyKeyboardMarkup settingsMenu() {
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(true);
-
-        KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("\uD83D\uDC64 MY_PROFILE uD83D\uDC64");
-        keyboardRow.add("✅ SELECT_LANG ✅");
-
-        KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("\uD83D\uDD19 PREV");
-
-        keyboardRows.add(keyboardRow);
-        keyboardRows.add(keyboardRow1);
-
-        return replyKeyboardMarkup;
-    }
-
-    public ReplyKeyboardMarkup genderMenu() {
-        ReplyKeyboardMarkup replyKeyboardMarkup = new ReplyKeyboardMarkup();
-        List<KeyboardRow> keyboardRows = new ArrayList<>();
-        replyKeyboardMarkup.setKeyboard(keyboardRows);
-        replyKeyboardMarkup.setResizeKeyboard(true);
-        replyKeyboardMarkup.setSelective(true);
-        replyKeyboardMarkup.setOneTimeKeyboard(true);
-        replyKeyboardMarkup.setInputFieldPlaceholder("The gender is...");
-
-        KeyboardRow keyboardRow = new KeyboardRow();
-        keyboardRow.add("\uD83D\uDD7A MALE \uD83D\uDD7A");
-
-        KeyboardRow keyboardRow1 = new KeyboardRow();
-        keyboardRow1.add("\uD83D\uDC83 FEMALE \uD83D\uDC83");
-
-        KeyboardRow keyboardRow2 = new KeyboardRow();
-        keyboardRow2.add("\uD83E\uDD37\u200D♂️ OTHERS \uD83E\uDD37\u200D♂️");
-
-        keyboardRows.add(keyboardRow);
-        keyboardRows.add(keyboardRow1);
-        keyboardRows.add(keyboardRow2);
-
-        return replyKeyboardMarkup;
-    }
-
-    private void send(ReplyKeyboardMarkup menu, String text) {
+    public void send(ReplyKeyboardMarkup menu, String text) {
         SendMessage sendMessage = new SendMessage();
         sendMessage.setText(text);
-        sendMessage.setChatId(this.chatId);
+        sendMessage.setChatId(this.getChatId());
         sendMessage.setReplyMarkup(menu);
 
         try {
@@ -501,11 +271,11 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void send(InlineKeyboardMarkup menu, String text) {
+    public void send(InlineKeyboardMarkup menu, String text) {
         SendMessage sendMessage = new SendMessage();
         Integer replyToMessageId = sendMessage.getReplyToMessageId();
         sendMessage.setText(text);
-        sendMessage.setChatId(this.chatId);
+        sendMessage.setChatId(this.getChatId());
         sendMessage.setReplyMarkup(menu);
 
         try {
@@ -515,9 +285,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void send(String text) {
+    public void send(String text) {
         SendMessage sendMessage = new SendMessage();
-        sendMessage.setChatId(this.chatId);
+        sendMessage.setChatId(this.getChatId());
         sendMessage.setText(text);
 
         try {
@@ -527,9 +297,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void edit(int editedId, InlineKeyboardMarkup menu, String text) {
+    public void edit(int editedId, InlineKeyboardMarkup menu, String text) {
         EditMessageText editMessageText = new EditMessageText();
-        editMessageText.setChatId(this.chatId);
+        editMessageText.setChatId(getChatId());
         editMessageText.setText(text);
         editMessageText.setMessageId(editedId);
         editMessageText.setReplyMarkup(menu);
@@ -541,9 +311,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void edit(int editedId, String text) {
+    public void edit(int editedId, String text) {
         EditMessageText editMessageText = new EditMessageText();
-        editMessageText.setChatId(this.chatId);
+        editMessageText.setChatId(this.getChatId());
         editMessageText.setText(text);
         editMessageText.setMessageId(editedId);
 
@@ -555,9 +325,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-    private void delete(int deletedId) {
+    public void delete(int deletedId) {
         DeleteMessage deleteMessage = new DeleteMessage();
-        deleteMessage.setChatId(this.chatId);
+        deleteMessage.setChatId(this.getChatId());
         deleteMessage.setMessageId(deletedId);
         ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove(true);
         try {
@@ -567,8 +337,6 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
     }
 
-//    private void deleteReplyMenu(int deletedId) {
-//        ReplyKeyboardRemove replyKeyboardRemove = new ReplyKeyboardRemove();
-//
-//    }
+
+
 }
