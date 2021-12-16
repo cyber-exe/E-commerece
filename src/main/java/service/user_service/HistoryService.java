@@ -60,7 +60,7 @@ public class HistoryService implements BaseService<History, String> {
     }
 
     @Override
-    public List<History> getActives() {
+    public List<History> getActives(String data) {
         List<History> list = new ArrayList<>();
 
         for (History history : histories) {

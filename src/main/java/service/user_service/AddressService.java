@@ -34,7 +34,7 @@ public class AddressService implements BaseService<Address,String> {
     }
 
     @Override
-    public List<Address> getActives() {
+    public List<Address> getActives(String data) {
         return null;
     }
 

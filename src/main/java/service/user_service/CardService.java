@@ -61,7 +61,7 @@ public class CardService implements BaseService<Card, String> {
     }
 
     @Override
-    public List<Card> getActives() {
+    public List<Card> getActives(String data) {
         List<Card> list = new ArrayList<>();
 
         for (Card card : cards) {

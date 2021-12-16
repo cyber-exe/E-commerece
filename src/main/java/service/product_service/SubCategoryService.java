@@ -60,11 +60,11 @@ public class SubCategoryService implements BaseService<SubCategory, String> {
     }
 
     @Override
-    public List<SubCategory> getActives() {
+    public List<SubCategory> getActives(String data) {
         List<SubCategory> list = new ArrayList<>();
 
         for (SubCategory sub : subCategoryList) {
-            if(sub.isActive())
+            if(sub.isActive() && sub.getCategoryId().toString().equals(data))
                 list.add(sub);
         }
 
@@ -74,7 +74,7 @@ public class SubCategoryService implements BaseService<SubCategory, String> {
     @Override
     public boolean check(SubCategory subCategory) {
         for(SubCategory el : subCategoryList){
-            if(el.getId().equals(subCategory.getId()) && el.getParentId().equals(subCategory.getParentId()))
+            if(el.getId().equals(subCategory.getId()) && el.getCategoryId().equals(subCategory.getCategoryId()))
                 return true;
         }
         return false;

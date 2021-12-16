@@ -21,14 +21,16 @@ public class BuyerService implements BaseService<Buyer, String> {
         try {
             this.buyers = Objects.requireNonNullElseGet(listFromJson(Root.buyersPath), ArrayList::new);
         } catch (Exception e) {
+//            buyers = new ArrayList<>();
             e.printStackTrace();
-            buyers = new ArrayList<>();
+
         }
     }
 
 
     @Override
     public Buyer add(Buyer buyer) throws IOException {
+
         this.buyers.add(buyer);
         this.updateJson(this.buyers, Root.buyersPath);
         return buyer;
@@ -45,6 +47,9 @@ public class BuyerService implements BaseService<Buyer, String> {
 
     @Override
     public Buyer edit(Buyer buyer) throws IOException {
+        for(Buyer buyer1 : this.buyers){
+            System.out.println(buyer1.toString());
+        }
         this.updateJson(this.buyers, Root.buyersPath);
         return buyer;
     }
@@ -58,13 +63,21 @@ public class BuyerService implements BaseService<Buyer, String> {
         return null;
     }
 
+    public Buyer getUserByChatId(long chatId) {
+        for (Buyer buyer : buyers) {
+            if(buyer.getChatId() == chatId)
+                return buyer;
+        }
+        return null;
+    }
+
     @Override
     public List<Buyer> getList() {
         return this.buyers;
     }
 
     @Override
-    public List<Buyer> getActives() {
+    public List<Buyer> getActives(String data) {
 
         List<Buyer> list = new ArrayList<>();
 
@@ -92,8 +105,7 @@ public class BuyerService implements BaseService<Buyer, String> {
     public List<Buyer> listFromJson(String path) {
         ObjectMapper objectMapper = new ObjectMapper();
         try {
-            return objectMapper.readValue(new File(path), new TypeReference<List<Buyer>>() {
-            });
+            return objectMapper.readValue(new File(path), new TypeReference<List<Buyer>>() {});
         } catch (Exception e) {
             e.printStackTrace();
             return null;

@@ -66,7 +66,7 @@ public class SellerService implements BaseService<Seller, String> {
     }
 
     @Override
-    public List<Seller> getActives() {
+    public List<Seller> getActives(String data) {
         List<Seller> list = new ArrayList<>();
 
         for (Seller seller : sellerList) {

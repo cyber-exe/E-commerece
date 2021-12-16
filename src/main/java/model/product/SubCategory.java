@@ -12,5 +12,5 @@ import java.util.UUID;
 @NoArgsConstructor
 @Data
 public class SubCategory extends BaseModel {
-    private UUID parentId;
+    private UUID categoryId;
 }

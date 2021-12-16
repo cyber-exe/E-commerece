@@ -57,7 +57,7 @@ public class AdminService implements BaseService<Admin, String>{
     }
 
     @Override
-    public List<Admin> getActives() {
+    public List<Admin> getActives(String data) {
         return null;
     }
 

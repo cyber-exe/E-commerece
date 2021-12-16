@@ -59,7 +59,7 @@ public class CategoryService implements BaseService<Category, String> {
     }
 
     @Override
-    public List<Category> getActives() {
+    public List<Category> getActives(String data) {
         List<Category> list = new ArrayList<>();
 
         for (Category category : categoryList) {

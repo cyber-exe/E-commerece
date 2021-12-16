@@ -3,6 +3,7 @@ package bot;
 
 import lombok.SneakyThrows;
 import model.product.Category;
+import model.product.SubCategory;
 import model.user.Buyer;
 import model.user.Gender;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -19,13 +20,11 @@ import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.InlineKe
 import org.telegram.telegrambots.meta.api.objects.replykeyboard.buttons.KeyboardRow;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import service.product_service.CategoryService;
+import service.product_service.SubCategoryService;
 import service.user_service.BuyerService;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 
 public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private String chatId;
@@ -35,7 +34,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private BuyerService buyerService;
     private UserService userService;
     private CategoryService categoryService;
+    private SubCategoryService subCategoryService;
     private Buyer buyer;
+    private String categoryId;
     private int currentPage;
     private int prevMenuId;
     private int messageId;
@@ -49,6 +50,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         buyerService = new BuyerService();
         userService = new UserService();
         categoryService = new CategoryService();
+        subCategoryService = new SubCategoryService();
         this.state = State.SELECT_LANG;
         manageLangList.put("UZBEK", new ContentUz());
         manageLangList.put("RUSSIAN", new ContentRu());
@@ -76,9 +78,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             this.chatId = update.getMessage().getChatId().toString();
             int msgId = update.getMessage().getMessageId();
 
-            buyer = userService.getUserByChatId(update.getMessage().getChatId());
-            buyer.setCurrentPage(1);
-            buyerService.edit(buyer);
+            buyer = buyerService.getUserByChatId(update.getMessage().getChatId());
 
             if(buyer == null)
                 buyer = buyerService.add(new Buyer(update.getMessage().getChatId(), update.getMessage().getFrom().getFirstName()));
@@ -89,6 +89,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
                 this.send(langMenu(), this.message);
+
             } else if(text.equals("✅ SELECT_LANG ✅")) {
                 this.state = State.SELECT_LANG;
 
@@ -123,7 +124,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     buyer.setState(State.CATEGORY_LIST);
                     buyerService.edit(buyer);
 
-                    send(categoryMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                    send(categoryMenu(), "Categories");
                 }
             } else if(buyer.getState() == State.ENTER_CATEGORY_NAME) {
                 Category category = new Category();
@@ -133,8 +134,35 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
+                delete(buyer.getMassageId());
+//                edit(buyer.getMassageId(), categoryMenu(), "Categories");
 
-                edit(buyer.getMassageId(), categoryMenu(), "Category menu");
+                this.state = State.CATEGORY_LIST;
+                buyer.setMassageId(msgId);
+                buyer.setState(State.CATEGORY_LIST);
+                buyerService.edit(buyer);
+
+                send(categoryMenu(), "Categories");
+            } else if(buyer.getState() == State.ENTER_SUB_CATEGORY_NAME) {
+                SubCategory subCategory = new SubCategory();
+                subCategory.setName(text);
+                UUID ctgId = UUID.fromString(this.categoryId);
+                subCategory.setCategoryId(ctgId);
+                try {
+                    subCategoryService.add(subCategory);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                delete(buyer.getMassageId());
+//                edit(buyer.getMassageId(), subCategoryMenu(categoryId), "Sub   ategories");
+
+                this.state = State.SUB_CATEGORY_LIST;
+                buyer.setMassageId(msgId);
+                buyer.setState(State.SUB_CATEGORY_LIST);
+                buyerService.edit(buyer);
+
+                send(subCategoryMenu(this.categoryId), "subCategories");
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
@@ -173,8 +201,22 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 send("Enter category name: ");
             } else if(data.equals("DELETE_CATEGORY")) {
+                send("Select category");
                 this.state = State.DELETE_CATEGORY;
                 buyer.setState(State.DELETE_CATEGORY);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+            }else if(data.equals("ENTER_SUB_CATEGORY_NAME")) {
+                this.state = State.ENTER_SUB_CATEGORY_NAME;
+                buyer.setState(State.ENTER_SUB_CATEGORY_NAME);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+
+                send("Enter subcategory name: ");
+            } else if(data.equals("DELETE_SUB_CATEGORY")) {
+                send("Select category");
+                this.state = State.DELETE_SUB_CATEGORY;
+                buyer.setState(State.DELETE_SUB_CATEGORY);
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
             } else if(buyer.getState().equals(State.DELETE_CATEGORY)) {
@@ -184,12 +226,34 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     popup(callbackQueryId, "The category is not deleted!", false);
 
                 delete(buyer.getMassageId());
-                send(categoryMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                send(categoryMenu(), "Categories");
 
                 this.state = State.CATEGORY_LIST;
                 buyer.setState(State.CATEGORY_LIST);
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
+
+            } else if(buyer.getState().equals(State.DELETE_SUB_CATEGORY)) {
+                if(deleteSubCategory(data))
+                    popup(callbackQueryId, "The subcategory is deleted!", false);
+                else
+                    popup(callbackQueryId, "The subcategory is not deleted!", false);
+
+                delete(buyer.getMassageId());
+                send(subCategoryMenu(this.categoryId), "subbCategories");
+
+                this.state = State.SUB_CATEGORY_LIST;
+                buyer.setState(State.SUB_CATEGORY_LIST);
+                buyer.setMassageId(msgId);
+                buyerService.edit(buyer);
+
+            } else if(buyer.getState().equals(State.CATEGORY_LIST)) {
+                this.state = State.SUB_CATEGORY_LIST;
+                buyer.setMassageId(msgId);
+                buyer.setState(State.SUB_CATEGORY_LIST);
+                buyerService.edit(buyer);
+                this.categoryId = data;
+                edit(buyer.getMassageId(), subCategoryMenu(data), "SubCategories");
 
             } else if(data.equals("BACK")) {
                 if(buyer.getState() == State.CATEGORY_LIST) {
@@ -200,6 +264,16 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                     delete(update.getCallbackQuery().getMessage().getMessageId());
                     send(mainMenu(), "Main menu");
+                } else if(buyer.getState() == State.SUB_CATEGORY_LIST) {
+                    edit(buyer.getMassageId(), subCategoryMenu(this.categoryId), "Sub Categories");
+
+                    this.state = State.CATEGORY_LIST;
+                    buyer.setMassageId(msgId);
+                    buyer.setState(State.CATEGORY_LIST);
+                    buyerService.edit(buyer);
+
+//                    delete(msgId);
+
                 }
             } else if(data.equals("PREV")) {
                 if(buyer.getCurrentPage() != 1) {
@@ -207,14 +281,23 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     this.messageId = msgId;
                     buyer.setMassageId(msgId);
                     buyerService.edit(buyer);
-                    edit(msgId, categoryMenu(), "dasdas");
+
+                    if(buyer.getState().equals(State.CATEGORY_LIST))
+                        edit(msgId, categoryMenu(), "Categories");
+                    else if(buyer.getState().equals(State.SUB_CATEGORY_LIST))
+                        edit(msgId, subCategoryMenu(this.categoryId), "Sub-categories");
                 }
             } else if(data.equals("NEXT")) {
                 buyer.setCurrentPage(buyer.getCurrentPage() + 1);
                 this.messageId = msgId;
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
-                edit(msgId, categoryMenu(), "dasdas");
+
+                if(buyer.getState().equals(State.CATEGORY_LIST))
+                    edit(msgId, categoryMenu(), "Categories");
+                else if(buyer.getState().equals(State.SUB_CATEGORY_LIST))
+                    edit(msgId, subCategoryMenu(categoryId), "Sub-categories");
+
             }
         }
     }
@@ -227,7 +310,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
         List<List<InlineKeyboardButton>> list = new ArrayList<>();
 
-        for (Category category : categoryService.getActives()) {
+        for (Category category : categoryService.getActives("")) {
             if(this.buyer.getCurrentPage() * 10 - 10 == i)
                 getItem = true;
 
@@ -249,13 +332,55 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return list;
     }
 
+    public List<List<InlineKeyboardButton>> getItemList(String data) {
+        int i = 0;
+        boolean getItem = false;
+
+        List<List<InlineKeyboardButton>> list = new ArrayList<>();
+
+        for (SubCategory sub : subCategoryService.getActives(data)) {
+            if(this.buyer.getCurrentPage() * 10 - 10 == i)
+                getItem = true;
+
+            if(this.buyer.getCurrentPage() * 10 == i)
+                break;
+
+            if(getItem) {
+                InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
+                inlineKeyboardButton.setText(sub.getName());
+                inlineKeyboardButton.setCallbackData(sub.getId().toString());
+                List<InlineKeyboardButton> row = new ArrayList<>();
+                row.add(inlineKeyboardButton);
+                list.add(row);
+            }
+
+            i++;
+        }
+
+        return list;
+    }
+
+    public InlineKeyboardMarkup subCategoryMenu(String categoryId) {
+        InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
+        List<List<InlineKeyboardButton>> list = getItemList(categoryId);
+
+        list.add(pageRow());
+        list.add(addBtn("Add new subcategory", "ENTER_SUB_CATEGORY_NAME"));
+        list.add(deleteBtn("Delete subcategory","DELETE_SUB_CATEGORY"));
+        list.add(back());
+
+        inlineKeyboardMarkup.setKeyboard(list);
+
+        return inlineKeyboardMarkup;
+    }
+
     public InlineKeyboardMarkup categoryMenu() {
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
         List<List<InlineKeyboardButton>> list = getItemList();
 
         list.add(pageRow());
-        list.add(addCategory());
-        list.add(deleteCategoryBtn());
+        list.add(addBtn("Add new category", "ENTER_CATEGORY_NAME"));
+        list.add(deleteBtn("Delete category","DELETE_CATEGORY"));
         list.add(back());
 
         inlineKeyboardMarkup.setKeyboard(list);
@@ -309,10 +434,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return inlineKeyboardButton;
     }
 
-    public List<InlineKeyboardButton> addCategory() {
+    public List<InlineKeyboardButton> addBtn(String text, String callbackData) {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("Add new category");
-        inlineKeyboardButton.setCallbackData("ENTER_CATEGORY_NAME");
+        inlineKeyboardButton.setText(text);
+        inlineKeyboardButton.setCallbackData(callbackData);
 
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
@@ -320,10 +445,10 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         return row;
     }
 
-    public List<InlineKeyboardButton> deleteCategoryBtn() {
+    public List<InlineKeyboardButton> deleteBtn(String text, String callbackData) {
         InlineKeyboardButton inlineKeyboardButton = new InlineKeyboardButton();
-        inlineKeyboardButton.setText("Delete category");
-        inlineKeyboardButton.setCallbackData("DELETE_CATEGORY");
+        inlineKeyboardButton.setText(text);
+        inlineKeyboardButton.setCallbackData(callbackData);
 
         List<InlineKeyboardButton> row = new ArrayList<>();
         row.add(inlineKeyboardButton);
@@ -340,6 +465,24 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     return true;
                 } catch (IOException e) {
                     send("Category with this name is not defined!");
+                    e.printStackTrace();
+                }
+                break;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean deleteSubCategory(String data) {
+
+        for (SubCategory sub : subCategoryService.getList()) {
+            if(data.equals(sub.getId().toString())) {
+                try {
+                    this.subCategoryService.delete(sub);
+                    return true;
+                } catch (IOException e) {
+                    send("Sub category with this name is not defined!");
                     e.printStackTrace();
                 }
                 break;
