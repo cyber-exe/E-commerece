@@ -45,7 +45,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
     private CategoryService categoryService;
 //    private Executables executables;
     private InlineKeyboards inlineKeyboards;
-//    private ReplyKeyboards replyKeyboards;
+    private ReplyKeyboards replyKeyboards;
     private Buyer buyer;
     private int currentPage;
     private int prevMenuId;
@@ -58,9 +58,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         buyerService = new BuyerService();
         userService = new UserService();
         categoryService = new CategoryService();
-//        executables = new Executables();
-//        inlineKeyboards = new InlineKeyboards();
-//        replyKeyboards = new ReplyKeyboards();
+        inlineKeyboards = new InlineKeyboards();
+        replyKeyboards = new ReplyKeyboards();
+
 
         this.state = State.SELECT_LANG;
         manageLangList.put("UZBEK", new ContentUz());
@@ -90,7 +90,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         if(update.hasMessage()) {
             this.chatId = update.getMessage().getChatId().toString();
             int msgId = update.getMessage().getMessageId();
-            inlineKeyboards = new InlineKeyboards();
+//            executables = new Executables();
 
 
             buyer = userService.getUserByChatId(update.getMessage().getChatId());
@@ -104,7 +104,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
             delete(msgId);
             if(text.equals("/start")) {
                 this.message = "Assalomu alaykum. Tilni kiriting!\nHello, select language!\nПривет, выберите язык!";
-                send(new InlineKeyboards().langMenu(), this.message);
+                send(inlineKeyboards.langMenu(), this.message);
 
             } else if(text.equals("SELECT_LANG")) {
                 this.state = State.SELECT_LANG;
@@ -113,9 +113,9 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setCurrentPage(1);
                 buyerService.edit(buyer);
                 if(buyer.getMassageId() == 0)
-                    send(new InlineKeyboards().langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
+                    send( inlineKeyboards.langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
                 else
-                    edit(msgId, new InlineKeyboards().langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
+                    edit(msgId, inlineKeyboards.langMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).selected_lang);
 
             } else if(text.equals("SETTINGS")) {
                 this.state = State.SETTINGS;
@@ -123,7 +123,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setState(State.SETTINGS);
                 buyerService.edit(buyer);
 
-                send(new ReplyKeyboards().settingsMenu(), "SETTINGS");
+                send(replyKeyboards.settingsMenu(), "SETTINGS");
             } else if(text.equals("\uD83D\uDD19 PREV")) {
                 if(buyer.getState() == State.SETTINGS) {
                     this.state = State.MAIN_MENU;
@@ -131,7 +131,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     buyer.setState(State.MAIN_MENU);
                     buyerService.edit(buyer);
 
-                    send(new ReplyKeyboards().mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                    send(replyKeyboards.mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
                 }
             } else if(text.equals("PRODUCTS")) {
                 if(buyer.getState() == State.MAIN_MENU) {
@@ -152,7 +152,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     e.printStackTrace();
                 }
 
-                edit(buyer.getMassageId(), new InlineKeyboards().categoryMenu(buyer, categoryService), "Category menu");
+                edit(buyer.getMassageId(), inlineKeyboards.categoryMenu(buyer, categoryService), "Category menu");
             }
         } else if(update.hasCallbackQuery()) {
             this.chatId = update.getCallbackQuery().getMessage().getChatId().toString();
@@ -173,7 +173,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
 
                 this.state = State.MAIN_MENU;
 
-                send(new ReplyKeyboards().mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
+                send(replyKeyboards.mainMenu(), manageLangList.getOrDefault(buyer.getLan(), new ContentEng()).main_header);
             }
 
             else if(data.equals("ENTER_CATEGORY_NAME")) {
@@ -194,7 +194,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
 
-                if(new Executables().deleteCategory(data))
+                if(deleteCategory(data))
                     popup(callbackQueryId, "The category is deleted!");
                 else
                     popup(callbackQueryId, "The category is not deleted!");
@@ -208,7 +208,7 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     buyerService.edit(buyer);
 
                     delete(update.getCallbackQuery().getMessage().getMessageId());
-                    send(new ReplyKeyboards().mainMenu(), "Main menu");
+                    send(replyKeyboards.mainMenu(), "Main menu");
                 }
             } else if(data.equals("PREV")) {
                 if(buyer.getCurrentPage() != 1) {
@@ -216,17 +216,19 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
                     this.messageId = msgId;
                     buyer.setMassageId(msgId);
                     buyerService.edit(buyer);
-                    edit(msgId, new InlineKeyboards().categoryMenu(buyer, categoryService), "dasdas");
+                    edit(msgId,inlineKeyboards.categoryMenu(buyer, categoryService), "dasdas");
                 }
             } else if(data.equals("NEXT")) {
                 buyer.setCurrentPage(buyer.getCurrentPage() + 1);
                 this.messageId = msgId;
                 buyer.setMassageId(msgId);
                 buyerService.edit(buyer);
-                edit(msgId, new InlineKeyboards().categoryMenu(buyer, categoryService), "dasdas");
+                edit(msgId, inlineKeyboards.categoryMenu(buyer, categoryService), "dasdas");
             }
         }
     }
+
+
 
 
     public boolean deleteCategory(String data) {
@@ -243,7 +245,6 @@ public class TgBot extends TelegramLongPollingBot implements TelegramBotUtils {
         }
         return false;
     }
-
 
     public void popup(String callbackQueryId, String data) {
         AnswerCallbackQuery answerCallbackQuery = new AnswerCallbackQuery();

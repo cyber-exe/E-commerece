@@ -15,7 +15,7 @@ import java.util.List;
 
 public class InlineKeyboards {
 
-    public static InlineKeyboardMarkup langMenu() {
+    public InlineKeyboardMarkup langMenu() {
 
 
         InlineKeyboardMarkup inlineKeyboardMarkup = new InlineKeyboardMarkup();
